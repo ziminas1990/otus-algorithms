@@ -4,7 +4,7 @@ project(HW3)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-set(ALL_TARGETS Euklid Power Primes)
+set(ALL_TARGETS Euklid Power Primes Fibonacci)
 
 foreach(TARGET_NAME ${ALL_TARGETS})
   add_executable(${TARGET_NAME} "${TARGET_NAME}.cpp")
