@@ -1,5 +1,5 @@
 # otus-algorithms
-Homeworks for OUTS Alorithms
+Homeworks for OTUS Algorithms
 
 # Where are all sources?
 They are in orphan branches. For each homework separate orphan branch will be created.
