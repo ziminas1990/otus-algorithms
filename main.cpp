@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#include "Stopwatch.h"
 
 // Handy struct for manipulating with array as with binary tree
 // Almost zero overhead
@@ -160,5 +161,28 @@ int main(int argc, char* argv[])
     std::cout << "Testing heapSort():      " << (TestHeapSort() ? "OK" : "FAILED") << std::endl;
     return 0;
   }
-  return 0;
+
+  if (argc != 2)
+    return 1;
+
+  size_t    nLength = atol(argv[1]);
+  uint32_t* pArray  = new uint32_t[nLength];
+  for(uint32_t i = 0; i < nLength; ++i)
+    pArray[i] = i;
+  std::random_shuffle(pArray, pArray + nLength);
+
+  Stopwatch stopwatch;
+  stopwatch.start();
+  heapSort(pArray, nLength);
+  long nTime = stopwatch.sinceStartMs();
+
+  // checking result:
+  bool lCorrect = true;
+  for (size_t i = 0; i < nLength && lCorrect; ++i)
+    if (pArray[i] != i)
+      lCorrect = false;
+
+  std::cout << "Time: " << nTime << " ms (" << (lCorrect ? "correct" : "ERROR!") <<
+               ")" << std::endl;
+  return lCorrect ? 1 : 0;
 }
