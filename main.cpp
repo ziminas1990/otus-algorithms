@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <math.h>
+#include <memory.h>
 
 #include "Stopwatch.h"
 
@@ -26,10 +27,8 @@ public:
     return length / nStep + (length % nStep ? 1 : 0);
   }
 
-  T& operator[](size_t i)
-  {
-    return items[nOffset + i * nStep];
-  }
+  T& operator[](size_t i)       { return items[nOffset + i * nStep]; }
+  T  operator[](size_t i) const { return items[nOffset + i * nStep]; }
 
   std::vector<T>& data() { return items; }
 
@@ -39,7 +38,6 @@ private:
   size_t nStep   = 1;
 };
 
-
 template<typename T>
 void insert_sort(Array<T>& array)
 {
@@ -48,6 +46,8 @@ void insert_sort(Array<T>& array)
     for (size_t j = i; j > 0; --j) {
       if (array[j] < array[j - 1])
         std::swap(array[j], array[j - 1]);
+      else
+        break;
     }
   }
 }
@@ -102,6 +102,14 @@ std::vector<uint32_t> SedgewickCoefficients(uint32_t N)
   return ks;
 }
 
+bool checkSortedArray(Array<uint32_t> const& array)
+{
+  for(size_t i = 0; i < array.size(); ++i)
+    if (array[i] != i)
+      return false;
+  return true;
+}
+
 bool TestInsertSort()
 {
   Array<uint32_t> array(1000);
@@ -111,9 +119,8 @@ bool TestInsertSort()
   for (size_t i = 0; i < 10; ++i) {
     std::random_shuffle(array.data().begin(), array.data().end());
     insert_sort(array);
-    for(size_t j = 0; j < array.size(); ++j)
-      if (array[j] != j)
-        return false;
+    if (!checkSortedArray(array))
+      return false;
   }
   return true;
 }
@@ -129,9 +136,8 @@ bool TestShellSort()
   for (size_t i = 0; i < 10; ++i) {
     std::random_shuffle(array.data().begin(), array.data().end());
     shell_sort(array, ks);
-    for(size_t j = 0; j < array.size(); ++j)
-      if (array[j] != j)
-        return false;
+    if (!checkSortedArray(array))
+      return false;
   }
   return true;
 }
@@ -162,7 +168,8 @@ int main(int argc, char* argv[])
     stopwatch.start();
     insert_sort(unsortedData);
     uint32_t nDuration = stopwatch.sinceStartMs();
-    std::cout << "insert_sort: " << nDuration << " ms" << std::endl;
+    std::cout << "insert_sort: " << nDuration << " ms (" <<
+                 (checkSortedArray(unsortedData) ? "correct" : "ERROR!") << ")" << std::endl;
   }
 
   {
@@ -172,7 +179,8 @@ int main(int argc, char* argv[])
     stopwatch.start();
     shell_sort(unsortedData, coefficients);
     uint32_t nDuration = stopwatch.sinceStartMs();
-    std::cout << "shell_sort (Shells): " << nDuration << " ms" << std::endl;
+    std::cout << "shell_sort (Shells): " << nDuration << " ms (" <<
+                 (checkSortedArray(unsortedData) ? "correct" : "ERROR!") << ")" << std::endl;
   }
 
   {
@@ -182,7 +190,8 @@ int main(int argc, char* argv[])
     stopwatch.start();
     shell_sort(unsortedData, coefficients);
     uint32_t nDuration = stopwatch.sinceStartMs();
-    std::cout << "shell_sort (Hibbard): " << nDuration << " ms" << std::endl;
+    std::cout << "shell_sort (Hibbard): " << nDuration << " ms (" <<
+                 (checkSortedArray(unsortedData) ? "correct" : "ERROR!") << ")" << std::endl;
   }
 
   {
@@ -192,7 +201,8 @@ int main(int argc, char* argv[])
     stopwatch.start();
     shell_sort(unsortedData, coefficients);
     uint32_t nDuration = stopwatch.sinceStartMs();
-    std::cout << "shell_sort (Sedgewick): " << nDuration << " ms" << std::endl;
+    std::cout << "shell_sort (Sedgewick): " << nDuration << " ms (" <<
+                 (checkSortedArray(unsortedData) ? "correct" : "ERROR!") << ")" << std::endl;
   }
   return 0;
 }
