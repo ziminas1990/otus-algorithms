@@ -52,6 +52,20 @@ void insert_sort(Array<T>& array)
   }
 }
 
+// same as insert_sort, but with plain C-style array
+template<typename T>
+void insert_sort_q(T* array, size_t nLength)
+{
+  for (size_t i = 1; i < nLength; ++i) {
+    for (size_t j = i; j > 0; --j) {
+      if (array[j] < array[j - 1])
+        std::swap(array[j], array[j - 1]);
+      else
+        break;
+    }
+  }
+}
+
 template<typename T>
 void shell_sort(Array<T>& array, std::vector<uint32_t> const& ks)
 {
@@ -166,7 +180,8 @@ int main(int argc, char* argv[])
     Array<uint32_t> unsortedData(array);
     Stopwatch stopwatch;
     stopwatch.start();
-    insert_sort(unsortedData);
+    //insert_sort(unsortedData);
+    insert_sort_q(unsortedData.data().data(), unsortedData.data().size());
     uint32_t nDuration = stopwatch.sinceStartMs();
     std::cout << "insert_sort: " << nDuration << " ms (" <<
                  (checkSortedArray(unsortedData) ? "correct" : "ERROR!") << ")" << std::endl;
