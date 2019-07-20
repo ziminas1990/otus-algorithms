@@ -8,7 +8,7 @@
 #include "Stopwatch.h"
 
 template<typename T>
-void insert_sort(T* array, size_t nLength)
+inline void insert_sort(T* array, size_t nLength)
 {
   for (size_t i = 1; i < nLength; ++i) {
     for (size_t j = i; j > 0; --j) {
@@ -43,7 +43,7 @@ template<typename T>
 void merge_sort(T* pBegin, T* pEnd, T* pArray)
 {
   size_t nLegnth = pEnd - pBegin;
-  if (nLegnth <= 64) {
+  if (nLegnth <= 4) {
     insert_sort(pArray, nLegnth);
     return;
   }
@@ -107,6 +107,14 @@ int main(int argc, char* argv[])
   uint32_t* pArray = new uint32_t[nLength];
   for(uint32_t i = 0; i < nLength; ++i)
     pArray[i] = i;
+
   std::random_shuffle(pArray, pArray + nLength);
+  Stopwatch stopwatch;
+  stopwatch.start();
+  merge_sort(pArray, nLength);
+  long duration = stopwatch.sinceStartMs();
+  std::cout << "Time: " << duration << " ms (" <<
+               (checkSortedArray(pArray, nLength) ? "correct" : "incorrect") <<
+               ")" << std::endl;
   return 0;
 }
