@@ -1,141 +1,130 @@
 #include <iostream>
 #include <stdint.h>
 #include <algorithm>
-#include <assert.h>
+#include <vector>
+#include <set>
 
 #include "Stopwatch.h"
+#include "TreeNode.h"
+
 
 template<typename T>
-class TreeNode
+class AVLTree
 {
 public:
-  TreeNode(T&& value, TreeNode* pParent = nullptr)
-    : value(std::move(value)), pLeft(nullptr), pRight(nullptr), nLevel(1)
-  {}
+  AVLTree() : pRoot(nullptr) {}
 
-  void insert(T value) { insert(new TreeNode<T>(value)); }
-  bool remove(T const& value);
-  TreeNode<T>* find(T const& value) const;
+  void insert(T value) {
+    if (pRoot) {
+      pRoot->insert(std::move(value));
+    } else {
+      pRoot = new TreeNode<T>(std::move(value));
+    }
+  }
+
+  bool remove(T const& value) {
+    if (!pRoot)
+      return false;
+    if (pRoot->data() != value || !pRoot->isLeaf())
+      return pRoot->remove(value);
+    // pRoot is leaf and contain exact value
+    delete pRoot;
+    pRoot = nullptr;
+    return true;
+  }
+
+  bool has(T const& value) const { return pRoot && pRoot->find(value); }
+
+  void mixedTraversal(std::vector<T>& out) const
+  {
+    if (!pRoot)
+      return;
+    // optimization:
+    size_t nInitialCapacity = 1 << pRoot->level();
+    if (nInitialCapacity > 2048)
+      nInitialCapacity = 2048;
+    out.reserve(nInitialCapacity);
+
+    pRoot->mixedTraversal(out);
+  }
 
 private:
-  void updateLevel();
-  void insert(TreeNode<T>* pNode);
-
-  void removeLeft();
-  void removeRight();
-
-  TreeNode<T> *search(T const& value, TreeNode<T> *&pParent) const;
-
-private:
-  T         value;
-  TreeNode* pParent;
-  TreeNode* pLeft;
-  TreeNode* pRight;
-  size_t    nLevel;
+  TreeNode<T>* pRoot;
 };
 
-template<typename T>
-bool TreeNode<T>::remove(T const& value)
-{
-  TreeNode* pParent       = this;
-  TreeNode* pNodeToRemove = search(value, pParent);
-  if (!pNodeToRemove)
-    return false;
 
-  assert(pNodeToRemove == pParent->pLeft || pNodeToRemove == pParent->pRight);
-  if (pNodeToRemove == pParent->pLeft) {
-    pParent->removeLeft();
-  } else {
-    pParent->removeRight();
-  }
+bool TestInsert()
+{
+  // 1. Creating random array
+  size_t nTotal = 10000;
+  std::vector<uint16_t> elements(nTotal);
+  for(size_t i = 0; i < nTotal; ++i)
+    elements[i] = i;
+  std::random_shuffle(elements.begin(), elements.end());
+
+  // 2. Building AVL tree, using elements from array
+  AVLTree<uint16_t> tree;
+  for(uint16_t element : elements)
+    tree.insert(element);
+
+  // 3. creating new array by mixed traversing AVL tree
+  elements.clear();
+  tree.mixedTraversal(elements);
+
+  // 4. checking, that new array is sorted
+  for (size_t i = 0; i < nTotal; ++i)
+    if (elements[i] != i)
+      return false;
   return true;
 }
 
-template<typename T>
-TreeNode<T>* TreeNode<T>::find(T const& value) const
+bool TestRemove()
 {
-  TreeNode* pParent;
-  return search(value, pParent);
-}
+  // 1. Creating random array
+  size_t nTotal = 10000;
+  std::vector<uint16_t> elements(nTotal);
+  for(uint16_t i = 0; i < nTotal; ++i)
+    elements[i] = i;
+  std::random_shuffle(elements.begin(), elements.end());
 
-template<typename T>
-TreeNode<T>* TreeNode<T>::search(T const& value, TreeNode<T>*& pParent) const
-{
-  if (this->value == value) {
-    return this;
-  }
-  pParent = this;
-  if (value < this->value) {
-    return pLeft ? pLeft->search(value) : nullptr;
-  } else {
-    return pRight ? pRight->search(value) : nullptr;
-  }
-}
+  // 2. selecting some elements, that will be removed
+  std::set<uint16_t> elementsToRemove;
+  for(uint16_t i = 0; i < nTotal / 10; ++i)
+    elementsToRemove.insert(elements[i]);
+  std::random_shuffle(elements.begin(), elements.end());
 
-template<typename T>
-void TreeNode<T>::updateLevel()
-{
-  size_t nLeftLevel  = pLeft  ? pLeft->nLevel  : 0;
-  size_t nRightLevel = pRight ? pRight->nLevel : 0;
-  nLevel = std::max(nLeftLevel, nRightLevel) + 1;
-}
+  // 3. Building AVL tree, using elements from array
+  AVLTree<uint16_t> tree;
+  for(uint16_t element : elements)
+    tree.insert(element);
 
-template<typename T>
-void TreeNode<T>::insert(TreeNode<T>* pNode)
-{
-  if (pNode->value <= value) {
-    if (pLeft) {
-      pLeft->insert(pNode);
-    } else {
-      pLeft = pNode;
-      pLeft->pParent = this;
-    }
-  } else {
-    if (pRight) {
-      pRight->insert(pNode);
-    } else {
-      pRight = pNode;
-      pRight->pParent = this;
-    }
-  }
-  updateLevel();
-}
+  // 4. Removing elements from tree
+  for (uint16_t element : elementsToRemove)
+    tree.remove(element);
 
-template<typename T>
-void TreeNode<T>::removeLeft()
-{
-  if (!pLeft)
-    return;
-  TreeNode* pNodeToRemove = pLeft;
-  if (pNodeToRemove->pLeft) {
-    pLeft = pNodeToRemove->pLeft;
-    if (pNodeToRemove->pRight)
-      pLeft->insert(pNodeToRemove->pRight);
-  } else {
-    pLeft = pNodeToRemove->pRight;
-  }
-  delete pNodeToRemove;
-}
+  // 5. creating new array by mixed traversing AVL tree and checking that it is sorted
+  elements.clear();
+  tree.mixedTraversal(elements);
+  if (elements.size() != nTotal - elementsToRemove.size())
+    return false;
+  for (size_t i = 1; i < elements.size(); ++i)
+    if (elements[i] < elements[i - 1])
+      return false;
 
-template<typename T>
-void TreeNode<T>::removeRight()
-{
-  if (!pRight)
-    return;
-  TreeNode* pNodeToRemove = pRight;
-  if (pNodeToRemove->pRight) {
-    pRight = pNodeToRemove->pRight;
-    if (pNodeToRemove->pLeft)
-      pRight->insert(pNodeToRemove->pLeft);
-  } else {
-    pRight = pNodeToRemove->pLeft;
-  }
-  delete pNodeToRemove;
+  // 6. Checking, that there is no removed elements in array
+  for (uint16_t element : elements)
+    if (elementsToRemove.find(element) != elementsToRemove.end())
+      return false;
+
+  return true;
 }
 
 
 int main(int argc, char* argv[])
 {
-  std::srand(time(0));
+  std::srand(time(nullptr));
+
+  std::cout << "Testing insertions: " << (TestInsert() ? "OK" : "FAILED") << std::endl;
+  std::cout << "Testing remove:     " << (TestRemove() ? "OK" : "FAILED") << std::endl;
   return 0;
 }
