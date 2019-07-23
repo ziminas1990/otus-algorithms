@@ -25,8 +25,9 @@ public:
   bool remove(T const& value) {
     if (!pRoot)
       return false;
-    if (pRoot->data() != value || !pRoot->isLeaf())
+    if (pRoot->data() != value || !pRoot->isLeaf()) {
       return pRoot->remove(value);
+    }
     // pRoot is leaf and contain exact value
     delete pRoot;
     pRoot = nullptr;
@@ -34,6 +35,8 @@ public:
   }
 
   bool has(T const& value) const { return pRoot && pRoot->find(value); }
+
+  bool isBalanced() const { return pRoot->isBalanced(); }
 
   void mixedTraversal(std::vector<T>& out) const
   {
@@ -64,8 +67,11 @@ bool TestInsert()
 
   // 2. Building AVL tree, using elements from array
   AVLTree<uint16_t> tree;
-  for(uint16_t element : elements)
+  for(uint16_t element : elements) {
     tree.insert(element);
+    if (!tree.isBalanced())
+      return false;
+  }
 
   // 3. creating new array by mixed traversing AVL tree
   elements.clear();
@@ -89,18 +95,24 @@ bool TestRemove()
 
   // 2. selecting some elements, that will be removed
   std::set<uint16_t> elementsToRemove;
-  for(uint16_t i = 0; i < nTotal / 10; ++i)
+  for(uint16_t i = 0; i < nTotal / 10 + 1; ++i)
     elementsToRemove.insert(elements[i]);
   std::random_shuffle(elements.begin(), elements.end());
 
   // 3. Building AVL tree, using elements from array
   AVLTree<uint16_t> tree;
-  for(uint16_t element : elements)
+  for(uint16_t element : elements) {
     tree.insert(element);
+    if (!tree.isBalanced())
+      return false;
+  }
 
   // 4. Removing elements from tree
-  for (uint16_t element : elementsToRemove)
+  for (uint16_t element : elementsToRemove) {
     tree.remove(element);
+    if (!tree.isBalanced())
+      return false;
+  }
 
   // 5. creating new array by mixed traversing AVL tree and checking that it is sorted
   elements.clear();
