@@ -10,13 +10,6 @@ template<typename T>
 class TreeNode
 {
 public:
-  enum class Rotation {
-    eRight,
-    eLeft,
-    eLeftRight,
-    eRightLeft
-  };
-
   TreeNode(T value)
     : value(std::move(value)), pParent(nullptr), pLeft(nullptr), pRight(nullptr),
       nLevel(1)
@@ -32,8 +25,6 @@ public:
   bool     isLeaf()     const { return !pLeft && !pRight; }
   size_t   level()      const { return nLevel; }
   T const& data()       const { return value; }
-
-  TreeNode<T>* find(T const& value) const;
 
   void mixedTraversal(std::vector<T>& out) const;
 
@@ -121,15 +112,6 @@ TreeNode<T>* TreeNode<T>::rebalance()
   }
   pNewRoot->updateLevel();
   return pNewRoot;
-}
-
-template<typename T>
-TreeNode<T>* TreeNode<T>::find(T const& value) const
-{
-  if (this->value == value)
-    return this;
-  TreeNode<T>*& pChild = (value <= this->value) ? pLeft : pRight;
-  return pChild ? pChild->find(value) : nullptr;
 }
 
 template<typename T>

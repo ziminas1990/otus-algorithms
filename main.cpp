@@ -27,8 +27,6 @@ public:
       pRoot = pRoot->remove(value);
   }
 
-  bool has(T const& value) const { return pRoot && pRoot->find(value); }
-
   bool isBalanced() const { return pRoot->isBalanced(); }
 
   void mixedTraversal(std::vector<T>& out) const
