@@ -18,12 +18,15 @@ public:
   };
 
   TreeNode(T value)
-    : value(std::move(value)), pLeft(nullptr), pRight(nullptr), nLevel(1)
+    : value(std::move(value)), pParent(nullptr), pLeft(nullptr), pRight(nullptr),
+      nLevel(1)
   {}
 
-  void insert(T value) { insert(new TreeNode<T>(std::move(value))); }
-  bool remove(T const& value);
-  bool rebalance();
+  // All this operations return pointer to new root of tree (or this, of root node
+  // was nat changed)
+  TreeNode<T>* insert(T value) { return insert(new TreeNode<T>(std::move(value))); }
+  TreeNode<T>* remove(T const& value);
+  TreeNode<T>* rebalance();
 
   bool     isBalanced() const { return abs(balance()) < 2; }
   bool     isLeaf()     const { return !pLeft && !pRight; }
@@ -36,12 +39,14 @@ public:
 
 private:
   void updateLevel();
-  void insert(TreeNode<T>* pNode);
+  TreeNode<T> *insert(TreeNode<T>* pNode);
 
+  void onChildChanged(TreeNode<T>* pOldChild, TreeNode<T>* pNewChild);
   void swapWithOther(TreeNode<T>* pOther);
-  void eraseSelf();
-  void removeLeft();
-  void removeRight();
+
+  // Removing this element from subtree and returns pointer to the new subtree root
+  // Release this element, if it is required ("delete this;" wil be called)
+  TreeNode<T>* eraseSelf();
 
   T const& findMinimalValue() const;
 
@@ -49,66 +54,62 @@ private:
   // if balance < 0, than left subtree is bigger than right subtree
   ssize_t balance() const;
 
-  bool rotateRight();
-  bool rotateLeft();
-  bool rotateLeftRight();
-  bool rotateRightLeft();
+  TreeNode<T>* rotateRight();
+  TreeNode<T>* rotateLeft();
+  TreeNode<T>* rotateLeftRight();
+  TreeNode<T>* rotateRightLeft();
 
 private:
-  T         value;
-  TreeNode* pLeft;
-  TreeNode* pRight;
-  size_t    nLevel;
+  T            value;
+  TreeNode<T>* pParent;
+  TreeNode<T>* pLeft;
+  TreeNode<T>* pRight;
+  size_t       nLevel;
 };
 
 template<typename T>
-void TreeNode<T>::insert(TreeNode<T>* pNode)
+TreeNode<T>* TreeNode<T>::insert(TreeNode<T>* pNode)
 {
   TreeNode<T>*& pChild = (pNode->value <= value) ? pLeft : pRight;
   if (pChild) {
-    pChild->insert(pNode);
+    pChild = pChild->insert(pNode);
   } else {
     pChild = pNode;
+    pChild->pParent = this;
   }
-  rebalance();
+  TreeNode<T>* pNewRoot = rebalance();
   updateLevel();
+  return pNewRoot;
 }
 
 template<typename T>
-bool TreeNode<T>::remove(T const& value)
+void TreeNode<T>::onChildChanged(TreeNode<T> *pOldChild, TreeNode<T> *pNewChild)
+{
+  if (pOldChild == pLeft)
+    pLeft = pNewChild;
+  else if (pOldChild == pRight)
+    pRight = pNewChild;
+}
+
+template<typename T>
+TreeNode<T>* TreeNode<T>::remove(T const& value)
 {
   if (this->value == value) {
-    assert(!isLeaf());
-    eraseSelf();
-    rebalance();
-    updateLevel();
-    return true;
+    return eraseSelf();
   }
 
-  bool          lSuccess = false;
-  TreeNode<T>*& pChild   = (value <= this->value) ? pLeft : pRight;
-  if (!pChild)
-    return false;
-
-  if (pChild->value != value) {
-    lSuccess = pChild->remove(value);
-  } else {
-    // pChild contains exact value
-    lSuccess = true;
-    if (!pChild->isLeaf()) {
-      pChild->eraseSelf();
-    } else {
-      delete pChild;
-      pChild = nullptr;
-    }
+  if (value <= this->value && pLeft) {
+    pLeft = pLeft->remove(value);
+  } else if (pRight) {
+    pRight = pRight->remove(value);
   }
-  rebalance();
+  TreeNode<T>* pNewRoot = rebalance();
   updateLevel();
-  return lSuccess;
+  return pNewRoot;
 }
 
 template<typename T>
-bool TreeNode<T>::rebalance()
+TreeNode<T>* TreeNode<T>::rebalance()
 {
   switch (balance()) {
     case -2: {
@@ -131,7 +132,7 @@ bool TreeNode<T>::rebalance()
     }
     default:
       // Tree is balanced already
-      return true;
+      return this;
   }
 }
 
@@ -163,50 +164,26 @@ void TreeNode<T>::updateLevel()
 }
 
 template<typename T>
-void TreeNode<T>::swapWithOther(TreeNode<T> *pOther)
-{  
-  // Exchangin fields
-  std::swap(value,  pOther->value);
-  std::swap(nLevel, pOther->nLevel);
-  std::swap(pLeft,  pOther->pLeft);
-  std::swap(pRight, pOther->pRight);
-
-  // One of this condition will be true, if one of node was a child of other node
-  if (pLeft == this)
-    pLeft = pOther;
-  if (pRight == this)
-    pRight = pOther;
-  if (pOther->pLeft == pOther)
-    pOther->pLeft = this;
-  if (pOther->pRight == pOther)
-    pOther->pRight = this;
-}
-
-template<typename T>
-void TreeNode<T>::eraseSelf()
+TreeNode<T>* TreeNode<T>::eraseSelf()
 {
+  TreeNode<T>* pNewRoot = nullptr;
   // if *this is a leaf, this function does nothing
   if (pLeft && pRight) {
-    value = pRight->findMinimalValue();
-    if (!pRight->isLeaf()) {
-      pRight->remove(value);
-    } else {
-      assert(pRight->value == value);
-      delete pRight;
-      pRight = nullptr;
-    }
-    return;
+    value  = pRight->findMinimalValue();
+    pRight = pRight->remove(value);
+    pNewRoot = this;
+  } else {
+    pNewRoot = pLeft ? pLeft : pRight;
+    if (pNewRoot)
+      pNewRoot->pParent = pParent;
+    delete this;
   }
 
-  TreeNode<T>* pNodeToBeDeleted = nullptr;
-  if (pLeft) {
-    pNodeToBeDeleted = pLeft;
-    this->swapWithOther(pLeft);
-  } else if (pRight) {
-    pNodeToBeDeleted = pRight;
-    this->swapWithOther(pRight);
+  if (pNewRoot) {
+    pNewRoot = pNewRoot->rebalance();
+    pNewRoot->updateLevel();
   }
-  delete pNodeToBeDeleted;
+  return pNewRoot;
 }
 
 template<typename T>
@@ -227,45 +204,59 @@ ssize_t TreeNode<T>::balance() const
 }
 
 template<typename T>
-bool TreeNode<T>::rotateRight()
+TreeNode<T>* TreeNode<T>::rotateRight()
 {
   assert(pLeft);
   if (!pLeft)
-    return false;
-  TreeNode<T>* pLeftChild = pLeft;
-  pLeft = pLeftChild->pRight;
-  pLeftChild->pRight = this;
-  pLeftChild->updateLevel();
+    return this;
+  TreeNode<T>* pNewRoot = pLeft;
+  if (pParent)
+    pParent->onChildChanged(this, pNewRoot);
+
+  pNewRoot->pParent = pParent;
+  pParent           = pNewRoot;
+  pLeft             = pNewRoot->pRight;
+  pNewRoot->pRight  = this;
+
   updateLevel();
-  // This call makes "this" node the root of the tree again
-  swapWithOther(pLeftChild);
-  return true;
+  pNewRoot->updateLevel();
+  return pNewRoot;
 }
 
 template<typename T>
-bool TreeNode<T>::rotateLeft()
+TreeNode<T>* TreeNode<T>::rotateLeft()
 {
   assert(pRight);
   if (!pRight)
-    return false;
-  TreeNode<T>* pRightChild = pRight;
-  pRight = pRightChild->pLeft;
-  pRightChild->pLeft = this;
-  pRightChild->updateLevel();
+    return this;
+  TreeNode<T>* pNewRoot = pRight;
+  if (pParent)
+    pParent->onChildChanged(this, pNewRoot);
+
+  pNewRoot->pParent = pParent;
+  pParent           = pNewRoot;
+  pRight            = pNewRoot->pLeft;
+  pNewRoot->pLeft   = this;
+
   updateLevel();
-  // This call makes "this" node the root of the tree again
-  swapWithOther(pRightChild);
-  return true;
+  pNewRoot->updateLevel();
+  return pNewRoot;
 }
 
 template<typename T>
-bool TreeNode<T>::rotateLeftRight()
+TreeNode<T>* TreeNode<T>::rotateLeftRight()
 {
-  return pLeft && pLeft->rotateLeft() && rotateRight();
+  if (!pLeft)
+    return this;
+  pLeft = pLeft->rotateLeft();
+  return rotateRight();
 }
 
 template<typename T>
-bool TreeNode<T>::rotateRightLeft()
+TreeNode<T>* TreeNode<T>::rotateRightLeft()
 {
-  return pRight && pRight->rotateRight() && rotateLeft();
+  if (!pRight)
+    return this;
+  pRight = pRight->rotateRight();
+  return rotateLeft();
 }

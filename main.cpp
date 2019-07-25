@@ -16,22 +16,15 @@ public:
 
   void insert(T value) {
     if (pRoot) {
-      pRoot->insert(std::move(value));
+      pRoot = pRoot->insert(std::move(value));
     } else {
       pRoot = new TreeNode<T>(std::move(value));
     }
   }
 
-  bool remove(T const& value) {
-    if (!pRoot)
-      return false;
-    if (pRoot->data() != value || !pRoot->isLeaf()) {
-      return pRoot->remove(value);
-    }
-    // pRoot is leaf and contain exact value
-    delete pRoot;
-    pRoot = nullptr;
-    return true;
+  void remove(T const& value) {
+    if (pRoot)
+      pRoot = pRoot->remove(value);
   }
 
   bool has(T const& value) const { return pRoot && pRoot->find(value); }
@@ -59,7 +52,7 @@ private:
 bool TestInsert()
 {
   // 1. Creating random array
-  size_t nTotal = 10000;
+  size_t nTotal = 5000;
   std::vector<uint16_t> elements(nTotal);
   for(size_t i = 0; i < nTotal; ++i)
     elements[i] = i;
@@ -87,7 +80,7 @@ bool TestInsert()
 bool TestRemove()
 {
   // 1. Creating random array
-  size_t nTotal = 10000;
+  size_t nTotal = 5000;
   std::vector<uint16_t> elements(nTotal);
   for(uint16_t i = 0; i < nTotal; ++i)
     elements[i] = i;
@@ -136,7 +129,12 @@ int main(int argc, char* argv[])
 {
   std::srand(time(nullptr));
 
-  std::cout << "Testing insertions: " << (TestInsert() ? "OK" : "FAILED") << std::endl;
-  std::cout << "Testing remove:     " << (TestRemove() ? "OK" : "FAILED") << std::endl;
+  for (size_t i = 0; i < 100; ++i) {
+    int nRand = std::rand() % 100000;
+    std::srand(nRand);
+    std::cout << "srand(" << nRand << "):" << std::endl;
+    std::cout << "  Testing insertions: " << (TestInsert() ? "OK" : "FAILED") << std::endl;
+    std::cout << "  Testing remove:     " << (TestRemove() ? "OK" : "FAILED") << std::endl;
+  }
   return 0;
 }
