@@ -42,7 +42,6 @@ private:
   TreeNode<T> *insert(TreeNode<T>* pNode);
 
   void onChildChanged(TreeNode<T>* pOldChild, TreeNode<T>* pNewChild);
-  void swapWithOther(TreeNode<T>* pOther);
 
   // Removing this element from subtree and returns pointer to the new subtree root
   // Release this element, if it is required ("delete this;" wil be called)
