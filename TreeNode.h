@@ -76,9 +76,7 @@ TreeNode<T>* TreeNode<T>::insert(TreeNode<T>* pNode)
     pChild = pNode;
     pChild->pParent = this;
   }
-  TreeNode<T>* pNewRoot = rebalance();
-  updateLevel();
-  return pNewRoot;
+  return rebalance();
 }
 
 template<typename T>
@@ -95,44 +93,34 @@ TreeNode<T>* TreeNode<T>::remove(T const& value)
 {
   if (this->value == value) {
     return eraseSelf();
-  }
-
-  if (value <= this->value && pLeft) {
+  } else if (value <= this->value && pLeft) {
     pLeft = pLeft->remove(value);
   } else if (pRight) {
     pRight = pRight->remove(value);
   }
-  TreeNode<T>* pNewRoot = rebalance();
-  updateLevel();
-  return pNewRoot;
+  return rebalance();
 }
 
 template<typename T>
 TreeNode<T>* TreeNode<T>::rebalance()
 {
+  TreeNode<T>* pNewRoot = this;
   switch (balance()) {
     case -2: {
       // Left subtree is bigger then right subtree
       assert(pLeft);
-      if (pLeft->balance() <= 0) {
-        return rotateRight();
-      } else {
-        return rotateLeftRight();
-      }
+      pNewRoot = (pLeft->balance() <= 0) ? rotateRight() : rotateLeftRight();
+      break;
     }
     case 2: {
       // Right subtree is bigger than left subtree
       assert(pRight);
-      if (pRight->balance() <= 0) {
-        return rotateRightLeft();
-      } else {
-        return rotateLeft();
-      }
+      pNewRoot = (pRight->balance() <= 0) ? rotateRightLeft() : rotateLeft();
+      break;
     }
-    default:
-      // Tree is balanced already
-      return this;
   }
+  pNewRoot->updateLevel();
+  return pNewRoot;
 }
 
 template<typename T>
@@ -177,12 +165,7 @@ TreeNode<T>* TreeNode<T>::eraseSelf()
       pNewRoot->pParent = pParent;
     delete this;
   }
-
-  if (pNewRoot) {
-    pNewRoot = pNewRoot->rebalance();
-    pNewRoot->updateLevel();
-  }
-  return pNewRoot;
+  return pNewRoot ? pNewRoot->rebalance() : nullptr;
 }
 
 template<typename T>
