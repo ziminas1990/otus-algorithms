@@ -136,7 +136,6 @@ template<typename T>
 TreeNode<T>* TreeNode<T>::eraseSelf()
 {
   TreeNode<T>* pNewRoot = nullptr;
-  // if *this is a leaf, this function does nothing
   if (pLeft && pRight) {
     value  = pRight->findMinimalValue();
     pRight = pRight->remove(value);
