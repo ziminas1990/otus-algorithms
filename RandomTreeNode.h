@@ -17,10 +17,10 @@ public:
 
   // All this operations return pointer to new root of tree (or this, of root node
   // was nat changed)
-  virtual RandomTreeNode<T>* insert(T value) {
+  RandomTreeNode<T>* insert(T value) {
     return insert(new RandomTreeNode<T>(std::move(value)));
   }
-  virtual RandomTreeNode<T>* remove(T const& value);
+  RandomTreeNode<T>* remove(T const& value);
 
   bool     isLeaf()     const { return !pLeft && !pRight; }
   size_t   level()      const { return nLevel; }
