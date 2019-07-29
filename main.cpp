@@ -157,6 +157,76 @@ void RunAllTests()
                RunRandomizedTest(TestRemove, std::rand() % 100000, 100) << std::endl;
 }
 
+template<typename T, template<typename> class NodeType>
+void InsertRemovePerfomance(size_t nTotalElements, size_t nShuffleChunkSize)
+{
+  Stopwatch stopwatch;
+  long      duration = 0;
+
+  std::vector<T> elements = makeArray<T>(nTotalElements, nShuffleChunkSize);
+
+  // check insertion perfomance
+  Tree<T, NodeType> tree;
+  stopwatch.start();
+  for (uint32_t nElement : elements)
+    tree.insert(nElement);
+  duration = stopwatch.sinceStartMs();
+  std::cout << "  Insertion: " << duration     << " ms" << std::endl;
+
+  // check removing perfomance
+  elements = makeArray<T>(nTotalElements, nShuffleChunkSize);
+  stopwatch.start();
+  for (uint32_t nElement : elements)
+    tree.remove(nElement);
+  duration = stopwatch.sinceStartMs();
+  std::cout << "  Remove:    " << duration << " ms" << std::endl;
+}
+
+template<typename T, template<typename> class NodeType>
+void CheckRandomSearchPerfomance(size_t nTotalElements, size_t nShuffleChunkSize)
+{
+  Stopwatch stopwatch;
+  long      duration = 0;
+
+  Tree<T, NodeType> tree;
+
+  std::vector<T> elements = makeArray<T>(nTotalElements, nShuffleChunkSize);
+  for (uint32_t nElement : elements)
+    tree.insert(nElement);
+
+  elements = makeArray<T>(nTotalElements, nShuffleChunkSize);
+  stopwatch.start();
+  for (T elementToSearch : elements)
+      tree.has(elementToSearch);
+  duration = stopwatch.sinceStartMs();
+  std::cout << "  Random search: " << duration << " ms" << std::endl;
+}
+
+template<typename T, template<typename> class NodeType>
+void CheckRepeatedlySearchPerfomance(
+    size_t nTotalElements, size_t nShuffleChunkSize, size_t elementsPool)
+{
+  Stopwatch stopwatch;
+  long      duration = 0;
+
+  Tree<T, NodeType> tree;
+
+  std::vector<T> elements = makeArray<T>(nTotalElements, nShuffleChunkSize);
+  for (uint32_t nElement : elements)
+    tree.insert(nElement);
+
+  elements = makeArray<T>(nTotalElements, nShuffleChunkSize);
+  std::vector<T> elementsToSearch(elements.begin(), elements.begin() + elementsPool);
+  stopwatch.start();
+  for (size_t i = 0; i < 2 * nTotalElements / elementsPool; ++i)
+    for (T element : elementsToSearch)
+      tree.has(element);
+  duration = stopwatch.sinceStartMs();
+
+  std::cout << "  Repeatedly searching " << elementsPool << " elements: " <<
+               duration << " ms" << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
   std::srand(time(nullptr));
@@ -167,46 +237,24 @@ int main(int argc, char* argv[])
   }
 
   uint32_t nTotalElements    = atoi(argv[1]);
-  uint32_t nShuffleChunkSize = atoi(argv[2]);
+  uint32_t nShuffleChunkSize = nTotalElements/atoi(argv[2]);
 
   std::vector<uint32_t> elements = makeArray<uint32_t>(nTotalElements, nShuffleChunkSize);
 
-  Stopwatch stopwatch;
-  long      duration = 0;
+  std::cout << "Splay Tree:" << std::endl;
+  InsertRemovePerfomance<uint32_t, SplayTreeNode>(nTotalElements, nShuffleChunkSize);
+  CheckRandomSearchPerfomance<uint32_t, SplayTreeNode>(nTotalElements, nShuffleChunkSize);
+  CheckRepeatedlySearchPerfomance<uint32_t, SplayTreeNode>(nTotalElements, nShuffleChunkSize, 5);
+  CheckRepeatedlySearchPerfomance<uint32_t, SplayTreeNode>(nTotalElements, nShuffleChunkSize, 10);
+  CheckRepeatedlySearchPerfomance<uint32_t, SplayTreeNode>(nTotalElements, nShuffleChunkSize, 25);
+  CheckRepeatedlySearchPerfomance<uint32_t, SplayTreeNode>(nTotalElements, nShuffleChunkSize, 50);
 
-  {
-    Tree<uint16_t, SplayTreeNode> randomTree;
-    std::cout << "Randomized Tree:" << std::endl;
-    stopwatch.start();
-    for (uint32_t nElement : elements)
-      randomTree.insert(nElement);
-    duration = stopwatch.sinceStartMs();
-    std::cout << "  Insertion: " << duration     << " ms" << std::endl;
-
-    elements = makeArray<uint32_t>(nTotalElements, nShuffleChunkSize);
-    stopwatch.start();
-    for (uint32_t nElement : elements)
-      randomTree.remove(nElement);
-    duration = stopwatch.sinceStartMs();
-    std::cout << "  Remove:    " << duration << " ms" << std::endl << std::endl;
-  }
-
-  {
-    Tree<uint16_t, AVLTreeNode> AVLTree;
-    std::cout << "AVL Tree:" << std::endl;
-    stopwatch.start();
-    for (uint32_t nElement : elements)
-      AVLTree.insert(nElement);
-    duration = stopwatch.sinceStartMs();
-    std::cout << "  Insertion: " << duration     << " ms" << std::endl;
-
-    elements = makeArray<uint32_t>(nTotalElements, nShuffleChunkSize);
-    stopwatch.start();
-    for (uint32_t nElement : elements)
-      AVLTree.remove(nElement);
-    duration = stopwatch.sinceStartMs();
-    std::cout << "  Remove:    " << duration << " ms" << std::endl << std::endl;
-  }
-
+  std::cout << "\nAVL Tree:" << std::endl;
+  InsertRemovePerfomance<uint32_t, AVLTreeNode>(nTotalElements, nShuffleChunkSize);
+  CheckRandomSearchPerfomance<uint32_t, AVLTreeNode>(nTotalElements, nShuffleChunkSize);
+  CheckRepeatedlySearchPerfomance<uint32_t, AVLTreeNode>(nTotalElements, nShuffleChunkSize, 5);
+  CheckRepeatedlySearchPerfomance<uint32_t, AVLTreeNode>(nTotalElements, nShuffleChunkSize, 10);
+  CheckRepeatedlySearchPerfomance<uint32_t, AVLTreeNode>(nTotalElements, nShuffleChunkSize, 25);
+  CheckRepeatedlySearchPerfomance<uint32_t, AVLTreeNode>(nTotalElements, nShuffleChunkSize, 50);
   return 0;
 }

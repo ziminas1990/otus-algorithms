@@ -19,7 +19,7 @@ public:
   // was nat changed)
   AVLTreeNode<T>* insert(T value) { return insert(new AVLTreeNode<T>(std::move(value))); }
   AVLTreeNode<T>* remove(T const& value);
-  AVLTreeNode<T>* find(T const& value) const;
+  AVLTreeNode<T>* find(T const& value);
 
   bool     isBalanced() const { return abs(balance()) < 2; }
   bool     isLeaf()     const { return !pLeft && !pRight; }
@@ -94,7 +94,7 @@ AVLTreeNode<T>* AVLTreeNode<T>::remove(T const& value)
 }
 
 template<typename T>
-AVLTreeNode<T>* AVLTreeNode<T>::find(T const& value) const
+AVLTreeNode<T>* AVLTreeNode<T>::find(T const& value)
 {
   if (this->value == value)
     return this;

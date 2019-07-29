@@ -72,7 +72,7 @@ SplayTreeNode<T>* SplayTreeNode<T>::remove(T const& value)
 }
 
 template<typename T>
-SplayTreeNode<T>* SplayTreeNode<T>::find(T const& value)
+SplayTreeNode<T> *SplayTreeNode<T>::find(T const& value)
 {
   bool lFound = false;
   SplayTreeNode<T>* pNewRoot = liftToRoot(value, lFound);
