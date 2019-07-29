@@ -22,41 +22,36 @@ private:
 };
 
 
-// Creates array, that shuflled completely (nChunkSize == nTotal) or partially
-// (nChunkSize < nTotal)
-// If nChunkSize has defaule value 0, it will be equivalent to nChunkSize = nTotal
+// Creates array, that shuflled completely (nShuffledChunks == 1) or partially
+// (nShuffledChunks > 1)
+// If nShuffledChunks has defaule value 0, it will be equivalent to nShuffledChunks = 1
 // Examples:
 // Not shuffled array:  1 2 3 4 5 6 7 8 9
-// nChunkSize = 1:  1 2 3 4 5 6 7 8 9
-// nChunkSize = 2:  2 1 - 3 4 - 6 5 - 7 8 - 9
-// nChunkSize = 3:  1 3 2 - 5 4 6 - 8 9 7
-// nChunkSize = 5:  3 1 4 5 2 - 6 9 7 8
-// nChunkSize = 8:  3 1 2 5 4 7 6 8 - 9
-// nChunkSize = 9:  7 3 8 1 2 4 9 5 6
-
+// nShuffledChunks = 1:  7 3 8 1 2 4 9 5 6
+// nShuffledChunks = 1:  2 3 1 4 - 7 6 8 5 9
+// nShuffledChunks = 3:  1 3 2 - 5 4 6 - 8 9 7
+// nShuffledChunks = 5:  2 1 - 3 4 - 6 5 - 7 8 - 9
+// nShuffledChunks > 5:  1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
 template<typename T>
-std::vector<T> makeArray(size_t nTotal, uint16_t nChunkSize = 0)
+std::vector<T> makeArray(size_t nTotal, uint16_t nShuffledChunks = 1)
 {
-  if (nChunkSize == 0)
-    nChunkSize = nTotal;
-  if (nChunkSize > nTotal)
-    nChunkSize = nTotal;
-
-
   std::vector<T> elements(nTotal);
   for(size_t i = 0; i < nTotal; ++i)
     elements[i] = i;
 
-  size_t nLeft  = 0;
-  size_t nRight = nChunkSize;
-  while (nLeft < nTotal) {
-    std::random_shuffle(elements.data() + nLeft, elements.data() + nRight - 1);
-    nLeft   = nRight;
-    nRight += nChunkSize;
-    if (nRight > nTotal)
-      nRight = nTotal;
-  }
+  if (nShuffledChunks == 0)
+    nShuffledChunks = 1;
+  if (nShuffledChunks > nTotal)
+    nShuffledChunks = nTotal;
 
+  size_t nChunkSize = nTotal / nShuffledChunks;
+  for(size_t i = 0; i < nShuffledChunks; ++i) {
+    size_t nLeft  = i * nChunkSize;
+    size_t nRight = nLeft + nChunkSize;
+    if (i == nShuffledChunks - 1)
+      nRight = nTotal;  // last block could be bigger than previous
+    std::random_shuffle(elements.data() + nLeft, elements.data() + nRight);
+  }
   return elements;
 }
 
