@@ -135,10 +135,14 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  uint32_t nTotalElements    = atoi(argv[1]);
-  uint32_t nShuffleChunkSize = atoi(argv[2]);
+  uint32_t nTotalElements  = atoi(argv[1]);
+  uint32_t nShuffledChunks = atoi(argv[2]);
+  if (!nShuffledChunks)
+    nShuffledChunks = 1;
 
-  std::vector<uint32_t> elements = makeArray<uint32_t>(nTotalElements, nShuffleChunkSize);
+  uint32_t nShuffledChunkSize = nTotalElements / nShuffledChunks;
+
+  std::vector<uint32_t> elements;
 
   Stopwatch stopwatch;
   long      duration = 0;
@@ -146,6 +150,7 @@ int main(int argc, char* argv[])
   {
     Tree<uint16_t, RandomTreeNode> randomTree;
     std::cout << "Randomized Tree:" << std::endl;
+    elements = makeArray<uint32_t>(nTotalElements, nShuffledChunkSize);
     stopwatch.start();
     for (uint32_t nElement : elements)
       randomTree.insert(nElement);
@@ -153,7 +158,7 @@ int main(int argc, char* argv[])
     std::cout << "  Insertion: " << duration     << " ms" << std::endl;
     std::cout << "  Height:    " << randomTree.level() << std::endl;
 
-    elements = makeArray<uint32_t>(nTotalElements, nShuffleChunkSize);
+    elements = makeArray<uint32_t>(nTotalElements, nShuffledChunkSize);
     stopwatch.start();
     for (uint32_t nElement : elements)
       randomTree.remove(nElement);
@@ -164,6 +169,7 @@ int main(int argc, char* argv[])
   {
     Tree<uint16_t, AVLTreeNode> AVLTree;
     std::cout << "AVL Tree:" << std::endl;
+    elements = makeArray<uint32_t>(nTotalElements, nShuffledChunkSize);
     stopwatch.start();
     for (uint32_t nElement : elements)
       AVLTree.insert(nElement);
@@ -171,7 +177,7 @@ int main(int argc, char* argv[])
     std::cout << "  Insertion: " << duration     << " ms" << std::endl;
     std::cout << "  Height:    " << AVLTree.level() << std::endl;
 
-    elements = makeArray<uint32_t>(nTotalElements, nShuffleChunkSize);
+    elements = makeArray<uint32_t>(nTotalElements, nShuffledChunkSize);
     stopwatch.start();
     for (uint32_t nElement : elements)
       AVLTree.remove(nElement);
