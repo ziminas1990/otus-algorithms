@@ -25,7 +25,7 @@ class HashTable
   using Buckets   = std::vector<BucketPtr>;
 public:
 
-  HashTable(size_t nInitialBucketsCount = 101, size_t nListBucketLimit = 4)
+  HashTable(size_t nInitialBucketsCount = 101, size_t nListBucketLimit = 32)
     : m_Buckets(nInitialBucketsCount), m_nTotalItems(0),
       m_nListBucketLimit(nListBucketLimit)
   {}
