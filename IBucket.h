@@ -17,6 +17,7 @@ public:
   virtual Value  find(Key const& key) const          = 0;
   virtual bool   remove(Key const& key)              = 0;
   virtual void   visitAll(VisitorFunction& fVisitor) = 0;
+  virtual size_t totalItems() const                  = 0;
 };
 
 template<typename Key, typename Value>

@@ -25,6 +25,8 @@ class AVLTreeBucket : public IBucket<Key, Value>
 
 public:
 
+  AVLTreeBucket() : pRoot(nullptr), m_nTotalItems(0) {}
+
   // overrides from IBacket
   bool insert(Key const& key, Value value) override
   {
@@ -35,9 +37,10 @@ public:
         return false;
       }
       pRoot = pRoot->insert(NodeValue(key, value));
-      return true;
+    } else {
+      pRoot = new AVLTreeNode<NodeValue>(NodeValue(key, std::move(value)));
     }
-    pRoot = new AVLTreeNode<NodeValue>(NodeValue(key, std::move(value)));
+    ++m_nTotalItems;
     return true;
   }
 
@@ -55,6 +58,7 @@ public:
     if (!lHasElement)
       return false;
     pRoot = pRoot->remove(NodeValue(key));
+    --m_nTotalItems;
     return true;
   }
 
@@ -65,6 +69,9 @@ public:
     pRoot->visit([&fVisitor](NodeValue& node) { fVisitor(node.key, node.value); });
   }
 
+  size_t totalItems() const override { return m_nTotalItems; }
+
 private:
   AVLTreeNode<NodeValue>* pRoot;
+  size_t m_nTotalItems;
 };

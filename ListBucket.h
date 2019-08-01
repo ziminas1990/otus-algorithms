@@ -47,6 +47,8 @@ public:
       fVisitor(item.first, item.second);
   }
 
+  size_t totalItems() const override { return m_Items.size(); }
+
 private:
   typename ItemsList::const_iterator findItem(Key const& key) const {
     return std::find_if(m_Items.begin(), m_Items.end(),
