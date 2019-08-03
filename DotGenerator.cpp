@@ -28,9 +28,23 @@ std::string generateEdges(IGraph const& graph, std::string const& sLinePrefix)
   return ss.str();
 }
 
-std::string generateDot(IGraph const& graph)
+std::string generateNodesInfo(IGraph const& graph, INodeStorage const& data,
+                              std::string const& sLinePrefix)
 {
   std::stringstream ss;
-  ss << "digraph G {\n" << generateEdges(graph, "  ") << "}";
+  size_t nTotalNodes = graph.getTotalNodes();
+  for(size_t nNodeId = 0; nNodeId < nTotalNodes; ++nNodeId) {
+    ss << sLinePrefix << nNodeId << " [label = \"";
+    ss << data.getNodeName(nNodeId);
+    ss << "\"];\n";
+  }
+  return ss.str();
+}
+
+std::string generateDot(IGraph const& graph, INodeStorage const& data)
+{
+  std::stringstream ss;
+  ss << "digraph G {\n" << generateNodesInfo(graph, data, "  ") << "\n\n" <<
+        generateEdges(graph, "  ") << "}";
   return ss.str();
 }

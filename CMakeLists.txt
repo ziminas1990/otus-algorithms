@@ -4,7 +4,7 @@ project(HW11-Kosaraio)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-add_executable(Kosaraio main.cpp DotGenerator.cpp AdjancencyVectorGraph.cpp)
+add_executable(Kosaraio main.cpp DotGenerator.cpp)
 
 set_target_properties(Kosaraio PROPERTIES
   CXX_STANDARD 17
