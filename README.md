@@ -1,6 +1,6 @@
 # Homework #11: Kosaraja Algorithm
 
-На вход программе подаётся файл в следующем формате:
+На вход программе подаётся файл вроде такого ([example.txt](https://github.com/ziminas1990/otus-algorithms/blob/hw-12-Kosaraio/example.txt)):
 ```
 A B
 B E F C
@@ -43,6 +43,10 @@ digraph G {
 }
 ```
 
-И в виде изображения:
+И в виде изображения: [example.svg](https://github.com/ziminas1990/otus-algorithms/blob/hw-12-Kosaraio/example.svg)
 
 Задача приложения - найти в исходном графе компоненты сильной связности - т.е. такие подграфы, все элементы которых сильно связаны между собой (из любого узла можно дойти до любого другого узла подграфа). Каждому найденному подграфу назначается некоторый случайный цвет и все узлы данного подграфа раскрашиваются в этот цвет.
+
+Более интересный пример:  
+Входные данные: [example_2.txt](https://github.com/ziminas1990/otus-algorithms/blob/hw-12-Kosaraio/example_2.txt)  
+Результат (уже в виде изображения): [example_2.svg](https://github.com/ziminas1990/otus-algorithms/blob/hw-12-Kosaraio/example_2.svg)  
