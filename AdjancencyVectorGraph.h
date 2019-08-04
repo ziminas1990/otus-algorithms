@@ -19,8 +19,10 @@ public:
     return m_graph.at(nNodeId).size();
   }
 
-  void getNeighbors(NodeId nNodeId, std::vector<NodeId>& out) const override {
-    out = m_graph.at(nNodeId);
+  size_t getNeighbors(NodeId nNodeId, std::vector<NodeId>& out) const override {
+    Neighbors const& neighbors = m_graph.at(nNodeId);
+    out.insert(out.end(), neighbors.begin(), neighbors.end());
+    return neighbors.size();
   }
 
 private:

@@ -1,4 +1,5 @@
 #include "DotGenerator.h"
+#include "Utils.h"
 #include <sstream>
 
 std::string enumerateNodes(std::vector<IGraph::NodeId> const& nodes)
@@ -34,9 +35,14 @@ std::string generateNodesInfo(IGraph const& graph, INodeStorage const& data,
   std::stringstream ss;
   size_t nTotalNodes = graph.getTotalNodes();
   for(size_t nNodeId = 0; nNodeId < nTotalNodes; ++nNodeId) {
-    ss << sLinePrefix << nNodeId << " [label = \"";
-    ss << data.getNodeName(nNodeId);
-    ss << "\"];\n";
+    std::string const& sNodeName = data.getNodeName(nNodeId);
+    std::string const& sNodeColor = colorAsDotString(data.getNodeColorARGB(nNodeId));
+
+    ss << sLinePrefix << nNodeId << " ["
+          "label = \"" << sNodeName << "\", " <<
+          "color = \"" << sNodeColor << "\", " <<
+          "style = filled" <<
+          "];\n";
   }
   return ss.str();
 }

@@ -63,7 +63,7 @@ std::vector<T> makeArray(size_t nTotal, uint16_t nChunkSize = 0)
 // Runs some test fTest, that use random numbers generator
 // If once test fails, this function prints initial value, that should be used to
 // reproduce this problem
-std::string RunRandomizedTest(
+inline std::string RunRandomizedTest(
     std::function<bool()> fTest, unsigned int nInitialRandomValue, size_t nTimes)
 {
   unsigned int nRand = nInitialRandomValue % 100000;
@@ -75,4 +75,30 @@ std::string RunRandomizedTest(
     nRand = std::rand() % 100000;
   }
   return "OK";
+}
+
+
+inline uint32_t createdRandomColor()
+{
+  uint8_t R = 0x40 + std::rand() % 0xB0;
+  uint8_t G = 0x40 + std::rand() % 0xB0;
+  uint8_t B = 0x40 + std::rand() % 0xB0;
+  return (R << 16) + (G << 8) + B;
+}
+
+inline std::string colorAsDotString(uint32_t nColor)
+{
+  char digits[] = { '0', '1', '2', '3', '4', '5', '6', '7',
+                    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+  char value[8];
+  value[0] = '#';
+  value[1] = digits[0x0F & (nColor >> 20)];
+  value[2] = digits[0x0F & (nColor >> 16)];
+  value[3] = digits[0x0F & (nColor >> 12)];
+  value[4] = digits[0x0F & (nColor >> 8)];
+  value[5] = digits[0x0F & (nColor >> 4)];
+  value[6] = digits[0x0F & nColor];
+  value[7] = '\0';
+  return value;
 }
