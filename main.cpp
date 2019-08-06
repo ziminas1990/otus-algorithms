@@ -33,22 +33,20 @@ void buildGraph(std::istream& input, IGraph& graph, GraphData<int>& graphData)
 
 int main(int argc, char* argv[])
 {
+  if (argc < 2)
+    return 0;
   std::srand(time(nullptr));
 
-  std::istream* input = &std::cin;
   std::ifstream file;
-  if (argc >= 2) {
-    file.open(argv[1]);
-    if (!file.good()) {
-      std::cerr << "FAILED to open file " << argv[1] << std::endl;
-      return 1;
-    }
-    input = &file;
+  file.open(argv[1]);
+  if (!file.good()) {
+    std::cerr << "FAILED to open file " << argv[1] << std::endl;
+    return 1;
   }
 
   GraphData<int> graphData;
   AdjancencyVectorGraph  graph;
-  buildGraph(*input, graph, graphData);
+  buildGraph(file, graph, graphData);
 
   IGraphData::Levels levels = demucron(graph);
 
@@ -62,7 +60,7 @@ int main(int argc, char* argv[])
     for (size_t nLevelId = 0; nLevelId < levels.size(); ++nLevelId) {
       std::cout << nLevelId << "\t";
       for (IGraph::NodeId nodeId : levels[nLevelId])
-        std::cout << " " << nodeId;
+        std::cout << " " << graphData.getNodeName(nodeId);
       std::cout << std::endl;
     }
   }
