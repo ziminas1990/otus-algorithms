@@ -55,7 +55,6 @@ static bool deikstra(IWeightedGraph const& graph, NodeId nStart, NodeId nFinish,
   std::map<NodeId, NodeContext> context;
   // index - NodeId; if value is True, that means that node has been visited already
   std::vector<NodeContext> visitedNodes(graph.getTotalNodes());
-  std::stack<NodeId> visitingOrder;
 
   context[nStart] = NodeContext(nStart, 0, IGraph::InvalidNodeId());
 
@@ -63,7 +62,6 @@ static bool deikstra(IWeightedGraph const& graph, NodeId nStart, NodeId nFinish,
     // looking for node, that has shortest path:
     NodeContext currentNode    = visitNodeWithShortestPath(context);
     NodeId      nCurrentNodeId = currentNode.nNodeId;
-    visitingOrder.push(nCurrentNodeId);
     visitedNodes[nCurrentNodeId] = currentNode;
     if (nCurrentNodeId == nFinish)
       break;
@@ -89,9 +87,6 @@ static bool deikstra(IWeightedGraph const& graph, NodeId nStart, NodeId nFinish,
       }
     }
   }
-
-  if (visitingOrder.top() != nFinish)
-    return false; // path not found
 
   path.reserve(10); // ¯\_(ツ)_/¯
 
