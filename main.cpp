@@ -9,7 +9,8 @@
 #include "GraphData.h"
 #include "AdjancencyMatrixGraph.h"
 #include "DotGenerator.h"
-#include "Kruskal.h"
+#include "RandomGraphGenerator.h"
+#include "Deikstra.h"
 
 
 void buildGraph(std::istream& input, IWeightedGraph& graph)
@@ -43,11 +44,39 @@ void buildGraph(std::istream& input, IWeightedGraph& graph)
   }
 }
 
-int main(int argc, char* argv[])
+void pathOnRandomGraph()
 {
-  if (argc < 2)
-    return 0;
   std::srand(time(nullptr));
+
+  AdjancencyMatrixGraph graph;
+  randomGraphGenerator(graph, 32);
+
+  NodesVector path;
+  for (size_t i = 0; i < 1000; ++i) {
+    NodesVector newPath;
+    deikstra(graph, rand() % graph.getTotalNodes(), rand() % graph.getTotalNodes(),
+             newPath);
+    if (newPath.size() > path.size())
+      path = std::move(newPath);
+  }
+
+  GraphData<int> graphData;
+  for (size_t i = 1; i < path.size(); ++i)
+    graphData.setEdgeColor(path[i - 1], path[i], 0x00FF0000);
+  std::cout << "\n" << generateGraphviz(graph, graphData) << std::endl;
+}
+
+int main(int argc, char* argv[])
+{ 
+  std::srand(time(nullptr));
+
+  if (argc < 2) {
+    pathOnRandomGraph();
+    return 0;
+  }
+
+  if (argc < 4)
+    return 0;
 
   std::ifstream file;
   file.open(argv[1]);
@@ -59,16 +88,19 @@ int main(int argc, char* argv[])
   AdjancencyMatrixGraph  graph;
   buildGraph(file, graph);
 
-  NodeId nStart  = 3;
-  NodeId nFinish = 5;
+  NodeId nStart  = atol(argv[2]);
+  NodeId nFinish = atol(argv[3]);
+
+  if (nStart >= graph.getTotalNodes() || nFinish >= graph.getTotalNodes())
+    return 0;
 
   NodesVector path;
   deikstra(graph, nStart, nFinish, path);
 
-  if (argc == 3 && std::string(argv[2]) == "dot") {
+  if (argc == 5 && std::string(argv[4]) == "dot") {
     GraphData<int> graphData;
     for (size_t i = 1; i < path.size(); ++i)
-      graphData.setEdgeColor(path[i - 1], path[i], 0x0000FF00);
+      graphData.setEdgeColor(path[i - 1], path[i], 0x00FF0000);
 
     std::cout << "\n" << generateGraphviz(graph, graphData) << std::endl;
   } else {

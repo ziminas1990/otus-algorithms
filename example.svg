@@ -24,8 +24,8 @@
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#ff0000" d="M33.431,-353.1995C37.2648,-342.6208 42.1185,-329.2282 45.9675,-318.6076"/>
-<text text-anchor="middle" x="36.1992" y="-340.1035" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
+<path fill="none" stroke="#000000" d="M33.431,-353.1995C37.2648,-342.6208 42.1185,-329.2282 45.9675,-318.6076"/>
+<text text-anchor="middle" x="28.9129" y="-340.1035" font-family="Times,serif" font-size="14.00" fill="#000000">~10</text>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
@@ -37,7 +37,7 @@
 <g id="edge2" class="edge">
 <title>0&#45;&gt;2</title>
 <path fill="none" stroke="#000000" d="M49.9238,-380.4961C91.8035,-397.9464 180.219,-434.787 222.1136,-452.2435"/>
-<text text-anchor="middle" x="132.5187" y="-420.5698" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+<text text-anchor="middle" x="125.2324" y="-420.5698" font-family="Times,serif" font-size="14.00" fill="#000000">~30</text>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
@@ -49,7 +49,7 @@
 <g id="edge3" class="edge">
 <title>0&#45;&gt;3</title>
 <path fill="none" stroke="#000000" d="M29.4673,-389.1805C36.6996,-442.6352 57.7893,-598.5115 64.9802,-651.66"/>
-<text text-anchor="middle" x="43.7237" y="-524.6203" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+<text text-anchor="middle" x="36.4374" y="-524.6203" font-family="Times,serif" font-size="14.00" fill="#000000">~40</text>
 </g>
 <!-- 6 -->
 <g id="node5" class="node">
@@ -61,7 +61,7 @@
 <g id="edge4" class="edge">
 <title>0&#45;&gt;6</title>
 <path fill="none" stroke="#000000" d="M39.0457,-387.1027C71.0614,-430.0493 158.0093,-546.6836 190.1211,-589.7592"/>
-<text text-anchor="middle" x="111.0834" y="-492.631" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+<text text-anchor="middle" x="103.7971" y="-492.631" font-family="Times,serif" font-size="14.00" fill="#000000">~40</text>
 </g>
 <!-- 4 -->
 <g id="node6" class="node">
@@ -72,8 +72,8 @@
 <!-- 1&#45;&gt;4 -->
 <g id="edge5" class="edge">
 <title>1&#45;&gt;4</title>
-<path fill="none" stroke="#ff0000" d="M79.2502,-303.8027C107.3672,-307.1421 151.3289,-312.3633 179.4272,-315.7005"/>
-<text text-anchor="middle" x="125.8387" y="-313.9516" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+<path fill="none" stroke="#000000" d="M79.2502,-303.8027C107.3672,-307.1421 151.3289,-312.3633 179.4272,-315.7005"/>
+<text text-anchor="middle" x="118.5524" y="-313.9516" font-family="Times,serif" font-size="14.00" fill="#000000">~20</text>
 </g>
 <!-- 5 -->
 <g id="node7" class="node">
@@ -84,8 +84,8 @@
 <!-- 1&#45;&gt;5 -->
 <g id="edge6" class="edge">
 <title>1&#45;&gt;5</title>
-<path fill="none" stroke="#ff0000" d="M49.5953,-282.5337C45.2835,-255.5413 37.2133,-205.0202 32.9079,-178.0681"/>
-<text text-anchor="middle" x="37.7516" y="-234.5009" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+<path fill="none" stroke="#000000" d="M49.5953,-282.5337C45.2835,-255.5413 37.2133,-205.0202 32.9079,-178.0681"/>
+<text text-anchor="middle" x="30.4653" y="-234.5009" font-family="Times,serif" font-size="14.00" fill="#000000">~20</text>
 </g>
 <!-- 8 -->
 <g id="node8" class="node">
@@ -97,25 +97,25 @@
 <g id="edge7" class="edge">
 <title>1&#45;&gt;8</title>
 <path fill="none" stroke="#000000" d="M61.5229,-283.3699C88.0148,-232.7944 165.2666,-85.314 191.6068,-35.0281"/>
-<text text-anchor="middle" x="123.0648" y="-163.399" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+<text text-anchor="middle" x="115.7785" y="-163.399" font-family="Times,serif" font-size="14.00" fill="#000000">~40</text>
 </g>
 <!-- 2&#45;&gt;3 -->
 <g id="edge8" class="edge">
 <title>2&#45;&gt;3</title>
 <path fill="none" stroke="#000000" d="M231.4131,-477.7685C198.2654,-516.5536 113.8066,-615.3764 80.8628,-653.9229"/>
-<text text-anchor="middle" x="152.638" y="-570.0457" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+<text text-anchor="middle" x="145.3517" y="-570.0457" font-family="Times,serif" font-size="14.00" fill="#000000">~50</text>
 </g>
 <!-- 2&#45;&gt;6 -->
 <g id="edge10" class="edge">
 <title>2&#45;&gt;6</title>
 <path fill="none" stroke="#ff0000" d="M239.8086,-479.4887C231.5929,-507.1698 215.785,-560.4311 207.543,-588.201"/>
-<text text-anchor="middle" x="220.1758" y="-538.0448" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+<text text-anchor="middle" x="212.8895" y="-538.0448" font-family="Times,serif" font-size="14.00" fill="#000000">~20</text>
 </g>
 <!-- 2&#45;&gt;4 -->
 <g id="edge9" class="edge">
 <title>2&#45;&gt;4</title>
-<path fill="none" stroke="#ff0000" d="M240.2076,-443.9904C232.7506,-416.6012 218.5477,-364.4351 211.054,-336.9112"/>
-<text text-anchor="middle" x="222.1308" y="-394.6508" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+<path fill="none" stroke="#000000" d="M240.2076,-443.9904C232.7506,-416.6012 218.5477,-364.4351 211.054,-336.9112"/>
+<text text-anchor="middle" x="214.8445" y="-394.6508" font-family="Times,serif" font-size="14.00" fill="#000000">~20</text>
 </g>
 <!-- 7 -->
 <g id="node9" class="node">
@@ -126,38 +126,38 @@
 <!-- 2&#45;&gt;7 -->
 <g id="edge11" class="edge">
 <title>2&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M253.458,-444.2856C277.6325,-393.8736 347.1691,-248.866 371.1236,-198.9129"/>
-<text text-anchor="middle" x="308.7908" y="-325.7992" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+<path fill="none" stroke="#ff0000" d="M253.458,-444.2856C277.6325,-393.8736 347.1691,-248.866 371.1236,-198.9129"/>
+<text text-anchor="middle" x="301.5045" y="-325.7992" font-family="Times,serif" font-size="14.00" fill="#000000">~40</text>
 </g>
 <!-- 3&#45;&gt;6 -->
 <g id="edge12" class="edge">
 <title>3&#45;&gt;6</title>
 <path fill="none" stroke="#ff0000" d="M89.6806,-659.1509C114.6635,-647.3618 154.9562,-628.3484 179.9526,-616.553"/>
-<text text-anchor="middle" x="131.3166" y="-642.0519" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+<text text-anchor="middle" x="124.0303" y="-642.0519" font-family="Times,serif" font-size="14.00" fill="#000000">~20</text>
 </g>
 <!-- 4&#45;&gt;5 -->
 <g id="edge13" class="edge">
 <title>4&#45;&gt;5</title>
 <path fill="none" stroke="#000000" d="M189.8904,-304.2162C156.34,-273.9592 79.7595,-204.896 46.2427,-174.6693"/>
-<text text-anchor="middle" x="114.5665" y="-243.6428" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+<text text-anchor="middle" x="107.2802" y="-243.6428" font-family="Times,serif" font-size="14.00" fill="#000000">~30</text>
 </g>
 <!-- 4&#45;&gt;7 -->
 <g id="edge14" class="edge">
 <title>4&#45;&gt;7</title>
-<path fill="none" stroke="#ff0000" d="M223.7042,-304.9717C256.9018,-278.6916 328.5085,-222.006 361.7419,-195.6976"/>
-<text text-anchor="middle" x="289.223" y="-254.5346" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+<path fill="none" stroke="#000000" d="M223.7042,-304.9717C256.9018,-278.6916 328.5085,-222.006 361.7419,-195.6976"/>
+<text text-anchor="middle" x="281.9367" y="-254.5346" font-family="Times,serif" font-size="14.00" fill="#000000">~30</text>
 </g>
 <!-- 5&#45;&gt;8 -->
 <g id="edge15" class="edge">
 <title>5&#45;&gt;8</title>
-<path fill="none" stroke="#ff0000" d="M47.0005,-145.9081C79.6814,-118.6805 150.9971,-59.2647 183.6237,-32.0822"/>
-<text text-anchor="middle" x="111.8121" y="-93.1951" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+<path fill="none" stroke="#000000" d="M47.0005,-145.9081C79.6814,-118.6805 150.9971,-59.2647 183.6237,-32.0822"/>
+<text text-anchor="middle" x="104.5258" y="-93.1951" font-family="Times,serif" font-size="14.00" fill="#000000">~30</text>
 </g>
 <!-- 7&#45;&gt;8 -->
 <g id="edge16" class="edge">
 <title>7&#45;&gt;8</title>
 <path fill="none" stroke="#000000" d="M363.1647,-166.9377C329.1188,-135.7598 250.4465,-63.7149 216.5457,-32.6699"/>
-<text text-anchor="middle" x="286.3552" y="-104.0038" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+<text text-anchor="middle" x="279.0689" y="-104.0038" font-family="Times,serif" font-size="14.00" fill="#000000">~30</text>
 </g>
 </g>
 </svg>

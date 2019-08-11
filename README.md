@@ -1,10 +1,12 @@
 # Homework #13: Demucron Algorithm
 ## Описание приложения
-Приложение имеет 2 необязательных параметра:
+Приложение имеет 3 необязательных параметра:
 ```
-Demucron [<file>] [dot]
+Demucron <file> start finish [dot]
 ```
   - <file> - файл с описанием графа в формате, предусмотренным заданием;
+  - start
+  - finish
   - dot - если параметр указан (его значение совпадает с его именем), то приложение выдаст на выход не список уровней (как предусмотрено заданием), а описание графа в формате GraphViz с указанием уровней узлов
   
 Пусть есть следующий входной файл **в формате, описанным в задании** (example.txt):
@@ -21,41 +23,34 @@ Demucron [<file>] [dot]
 ```
 Если запустим приложение, указав только файл, то получим <...>. Т.е. вывод **соответствует требованию задания**.
 ```
-$ ./Kruskal ./example.txt
+$ ./Deikstra ./example.txt 3 7
 ```
 ```
-0 -- 1
-1 -- 4
-1 -- 5
-2 -- 4
-2 -- 6
-3 -- 6
-4 -- 7
-5 -- 8
+3 -> 6 -> 2 -> 7
 ```
 
 Если запустим приложение, указав не только файл, но и дополнительную опцию "dot", то приложение сгенерит граф в формате GraphViz:
 ```
-./Kruskal ./example.txt dot
+./Deikstra ./example.txt 3 7 dot
 ```
 ```
 digraph G {
-  0 -> 1 [dir = none, label = 1, len = 1, color = "#FF0000"]
-  0 -> 2 [dir = none, label = 3, len = 3, color = "#000000"]
-  0 -> 3 [dir = none, label = 4, len = 4, color = "#000000"]
-  0 -> 6 [dir = none, label = 4, len = 4, color = "#000000"]
-  1 -> 4 [dir = none, label = 2, len = 2, color = "#FF0000"]
-  1 -> 5 [dir = none, label = 2, len = 2, color = "#FF0000"]
-  1 -> 8 [dir = none, label = 4, len = 4, color = "#000000"]
-  2 -> 3 [dir = none, label = 5, len = 5, color = "#000000"]
-  2 -> 4 [dir = none, label = 2, len = 2, color = "#FF0000"]
-  2 -> 6 [dir = none, label = 2, len = 2, color = "#FF0000"]
-  2 -> 7 [dir = none, label = 4, len = 4, color = "#000000"]
-  3 -> 6 [dir = none, label = 2, len = 2, color = "#FF0000"]
-  4 -> 5 [dir = none, label = 3, len = 3, color = "#000000"]
-  4 -> 7 [dir = none, label = 3, len = 3, color = "#FF0000"]
-  5 -> 8 [dir = none, label = 3, len = 3, color = "#FF0000"]
-  7 -> 8 [dir = none, label = 3, len = 3, color = "#000000"]
+  0 -> 1 [dir = none, label = "~10", len = 1, color = "#000000"]
+  0 -> 2 [dir = none, label = "~30", len = 3, color = "#000000"]
+  0 -> 3 [dir = none, label = "~40", len = 4, color = "#000000"]
+  0 -> 6 [dir = none, label = "~40", len = 4, color = "#000000"]
+  1 -> 4 [dir = none, label = "~20", len = 2, color = "#000000"]
+  1 -> 5 [dir = none, label = "~20", len = 2, color = "#000000"]
+  1 -> 8 [dir = none, label = "~40", len = 4, color = "#000000"]
+  2 -> 3 [dir = none, label = "~50", len = 5, color = "#000000"]
+  2 -> 4 [dir = none, label = "~20", len = 2, color = "#000000"]
+  2 -> 6 [dir = none, label = "~20", len = 2, color = "#FF0000"]
+  2 -> 7 [dir = none, label = "~40", len = 4, color = "#FF0000"]
+  3 -> 6 [dir = none, label = "~20", len = 2, color = "#FF0000"]
+  4 -> 5 [dir = none, label = "~30", len = 3, color = "#000000"]
+  4 -> 7 [dir = none, label = "~30", len = 3, color = "#000000"]
+  5 -> 8 [dir = none, label = "~30", len = 3, color = "#000000"]
+  7 -> 8 [dir = none, label = "~30", len = 3, color = "#000000"]
 }
 ```
 

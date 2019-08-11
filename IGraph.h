@@ -54,9 +54,9 @@ class IWeightedGraph : public IGraph
 {
 public:
 
-  virtual void     addEdge(NodeId nOneNodeId, NodeId nOtherNodeId, uint32_t nWeight) = 0;
+  virtual void   addEdge(NodeId nOneNodeId, NodeId nOtherNodeId, double nWeight) = 0;
   // if returns 0, that means that edge doesn't exist
-  virtual uint32_t getEdge(NodeId nOneNodeId, NodeId nOtherNodeId) const = 0;
+  virtual double getEdge(NodeId nOneNodeId, NodeId nOtherNodeId) const = 0;
 
   virtual void exportAllEdges(std::vector<Edge>& out) const;
 };

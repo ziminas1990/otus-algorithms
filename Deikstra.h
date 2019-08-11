@@ -4,6 +4,7 @@
 #include <map>
 #include <stdint.h>
 #include <assert.h>
+#include <algorithm>
 
 #include "IGraph.h"
 
@@ -11,21 +12,20 @@ struct NodeContext {
   NodeContext() = default;
   NodeContext(NodeId nodeId, uint32_t nShortestPathLength,
               NodeId nPreviosNode)
-    : nNodeId(nNodeId), lVisited(false), nShortestPath(nShortestPathLength),
-      nPreviousNode(nPreviousNode)
+    : nNodeId(nodeId), nShortestPath(nShortestPathLength),
+      nPreviousNode(nPreviosNode)
   {}
 
   bool isValid() const { return nNodeId != IGraph::InvalidNodeId(); }
 
   NodeId   nNodeId        = IGraph::InvalidNodeId();
-  bool     lVisited       = false;
   uint32_t nShortestPath  = 0;
   NodeId   nPreviousNode  = IGraph::InvalidNodeId();
 };
 
 // looks in list an element, that has minimal nShortestPath value, mark it as visited
 // and returns it
-NodeContext const& visitNodeWithShortestPath(std::map<NodeId, NodeContext>& context)
+NodeContext visitNodeWithShortestPath(std::map<NodeId, NodeContext>& context)
 {
   if (context.empty())
     return NodeContext();
@@ -44,23 +44,27 @@ NodeContext const& visitNodeWithShortestPath(std::map<NodeId, NodeContext>& cont
     ++itCurrent;
   }
 
-  itShortest->second.lVisited = true;
-  return itShortest->second;
+  NodeContext result = itShortest->second;
+  context.erase(itShortest);
+  return result;
 }
 
 static bool deikstra(IWeightedGraph const& graph, NodeId nStart, NodeId nFinish,
                      NodesVector& path)
 {
   std::map<NodeId, NodeContext> context;
-  std::stack<NodeId>            visitedNodes;
+  // index - NodeId; if value is True, that means that node has been visited already
+  std::vector<NodeContext> visitedNodes(graph.getTotalNodes());
+  std::stack<NodeId> visitingOrder;
 
   context[nStart] = NodeContext(nStart, 0, IGraph::InvalidNodeId());
 
   while (!context.empty()) {
     // looking for node, that has shortest path:
-    NodeContext const& currentNode    = visitNodeWithShortestPath(context);
-    NodeId             nCurrentNodeId = currentNode.nNodeId;
-    visitedNodes.push(nCurrentNodeId);
+    NodeContext currentNode    = visitNodeWithShortestPath(context);
+    NodeId      nCurrentNodeId = currentNode.nNodeId;
+    visitingOrder.push(nCurrentNodeId);
+    visitedNodes[nCurrentNodeId] = currentNode;
     if (nCurrentNodeId == nFinish)
       break;
 
@@ -70,11 +74,10 @@ static bool deikstra(IWeightedGraph const& graph, NodeId nStart, NodeId nFinish,
       continue;
 
     for (NodeId neighbor : neighbors) {
-      NodeContext& neighborContext = context[neighbor];
-      if (neighborContext.isValid() && neighborContext.lVisited)
-        // node has been visited already
-        continue;
+      if (visitedNodes[neighbor].isValid())
+        continue; // ignoring nodes, that has been handled already
 
+      NodeContext& neighborContext = context[neighbor];
       uint32_t nEdgeLength     = graph.getEdge(nCurrentNodeId, neighbor);
       uint32_t nPathToNeighbor = currentNode.nShortestPath + nEdgeLength;
 
@@ -87,13 +90,17 @@ static bool deikstra(IWeightedGraph const& graph, NodeId nStart, NodeId nFinish,
     }
   }
 
-  if (visitedNodes.top() != nFinish)
+  if (visitingOrder.top() != nFinish)
     return false; // path not found
 
-  path.reserve(visitedNodes.size());
-  while (!visitedNodes.empty()) {
-    path.push_back(visitedNodes.top());
-    visitedNodes.pop();
+  path.reserve(10); // ¯\_(ツ)_/¯
+
+  NodeId nCurrentNodeId = nFinish;
+  while(nCurrentNodeId != IGraph::InvalidNodeId()) {
+    NodeContext const& nodeContext = visitedNodes[nCurrentNodeId];
+    path.push_back(nodeContext.nNodeId);
+    nCurrentNodeId = nodeContext.nPreviousNode;
   }
+  std::reverse(path.begin(), path.end());
   return true;
 }

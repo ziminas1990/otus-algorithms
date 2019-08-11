@@ -16,25 +16,25 @@ public:
                       bool lAppend) const override;
 
 
-  void     addEdge(NodeId nOneNodeId, NodeId nOtherNodeId, uint32_t nWeight) override;
-  uint32_t getEdge(NodeId nOneNodeId, NodeId nOtherNodeId) const override;
+  void   addEdge(NodeId nOneNodeId, NodeId nOtherNodeId, double nWeight) override;
+  double getEdge(NodeId nOneNodeId, NodeId nOtherNodeId) const override;
 
 private:
-  std::vector<std::vector<uint32_t>> m_matrix;
+  std::vector<std::vector<double>> m_matrix;
 };
 
 
 inline NodeId AdjancencyMatrixGraph::addNode()
 {
   size_t nTotalNodes = m_matrix.size() + 1;
-  m_matrix.push_back(std::vector<uint32_t>());
+  m_matrix.push_back(std::vector<double>());
 
-  std::vector<uint32_t>& nNewNodeEdges = m_matrix.back();
+  std::vector<double>& nNewNodeEdges = m_matrix.back();
   // 0 - means that edge doesn't exist
   nNewNodeEdges.resize(nTotalNodes, 0);
 
   for (size_t i = 0; i < nTotalNodes - 1; ++i) {
-    std::vector<uint32_t>& edges = m_matrix[i];
+    std::vector<double>& edges = m_matrix[i];
     edges.push_back(0);
   }
 
@@ -47,7 +47,7 @@ inline size_t AdjancencyMatrixGraph::getNeighborsCount(NodeId nNodeId) const
   if (nNodeId >= m_matrix.size())
     return 0;
   size_t nTotal = 0;
-  std::vector<uint32_t> const& edges = m_matrix[nNodeId];
+  std::vector<double> const& edges = m_matrix[nNodeId];
   for (uint32_t nWeight : edges)
     if (nWeight)
       ++nTotal;
@@ -64,7 +64,7 @@ inline size_t AdjancencyMatrixGraph::getNeighbors(
     out.clear();
 
   size_t nTotal = 0;
-  std::vector<uint32_t> const& edges = m_matrix[nNodeId];
+  std::vector<double> const& edges = m_matrix[nNodeId];
   for (NodeId nNodeId = 0; nNodeId < edges.size(); ++nNodeId)
     if (edges[nNodeId])
       out.push_back(nNodeId);
@@ -74,7 +74,7 @@ inline size_t AdjancencyMatrixGraph::getNeighbors(
 inline
 void AdjancencyMatrixGraph::addEdge(NodeId nOneNodeId,
                                     NodeId nOtherNodeId,
-                                    uint32_t nWeight)
+                                    double nWeight)
 {
   assert(nOneNodeId < m_matrix.size());
   assert(nOtherNodeId < m_matrix.size());
@@ -85,7 +85,7 @@ void AdjancencyMatrixGraph::addEdge(NodeId nOneNodeId,
 }
 
 inline
-uint32_t AdjancencyMatrixGraph::getEdge(NodeId nOneNodeId, NodeId nOtherNodeId) const
+double AdjancencyMatrixGraph::getEdge(NodeId nOneNodeId, NodeId nOtherNodeId) const
 {
   assert(nOneNodeId < m_matrix.size());
   assert(nOtherNodeId < m_matrix.size());
