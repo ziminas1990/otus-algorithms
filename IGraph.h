@@ -21,11 +21,19 @@ public:
   virtual size_t getNeighborsCount(NodeId nNodeId) const = 0;
   virtual size_t getNeighbors(NodeId nNodeId, std::vector<NodeId>& out) const = 0;
 
+  // Позволяет построить граф, аналогичный данному
+  // Если lInverseEdges выставлен в true, то новый граф будет инвертированной
+  // версией старого графа
   virtual void buildFromOther(IGraph const& other, bool lInverseEdges = false);
 
   // Default implementation probably has very heigh complicity!
   virtual size_t getMaxNodeLevel() const;
 
+  // Функция проходит по узлам графа начиная с узла nFirstNode используя алгоритм
+  // поиска в глубину (Deep First Search)
+  // В visitedNodes будут добавляться посещаемые узлы в порядке их посещения
+  // В blackList будут отмечаться узлы, которые уже были посещены (как до
+  // вызова DFS, так и в процессе его работы)
   size_t DFS(NodeId nFirstNode, std::vector<NodeId>& visitedNodes,
              std::vector<bool>& blackList) const;
 };
