@@ -29,6 +29,6 @@
  
  ## Сравнение фрагментации и производительности для разных политик
  На базе теста Test() было проведено сравнение фрагментации и производительности AwesomeHeap при использовании разных политик.
- Результаты теста опубликовал в виде красивых графиков в google docs: [HW-17-Heap-Manager](https://docs.google.com/spreadsheets/d/19XK6a7a0GRHI84NOxD0WsdQVqNiVFSQOYbg3qVRnCwg/edit?usp=sharing)  
+ Результаты теста опубликовал в виде красивых графиков в google docs: [HW-17-Heap-Manager](https://docs.google.com/spreadsheets/d/19XK6a7a0GRHI84NOxD0WsdQVqNiVFSQOYbg3qVRnCwg/edit?usp=sharing) (графики загружаются не сразу)  
  Подробнее о методике оценки степени фрагментации я напишу завтра.
 
