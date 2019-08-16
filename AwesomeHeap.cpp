@@ -18,6 +18,11 @@ AwesomeHeap::AwesomeHeap(size_t nHeapSize, AllocatePolicy ePolicy)
     m_pFirstChunk(reinterpret_cast<Chunk*>(m_pArena)),
     m_pLastChunk(asChunk(m_pArena + nHeapSize))
 {
+  // Изначально создадим на куче два чанка:
+  // Первый чанк, чей заголовок находится в самых первых байтах
+  // кучи и который содержит в себе всю кучу, а так же последний
+  // чанк, который имеет нулевую длину и его заголовок расположен
+  // на последних байтах кучи.
   m_pFirstChunk->lFree     = true;
   m_pFirstChunk->pNext     = m_pLastChunk;
   m_pFirstChunk->pPrevious = nullptr;
@@ -32,6 +37,7 @@ AwesomeHeap::AwesomeHeap(size_t nHeapSize, AllocatePolicy ePolicy)
 
 void* AwesomeHeap::allocate(size_t nSize)
 {
+  // Надём подходящий чанк и отметим его как занятый
   size_t nAlignedSize = align(nSize + sizeof(Chunk)) - sizeof(Chunk);
   assert((sizeof(Chunk) + nAlignedSize) % 8 == 0);
 
@@ -42,6 +48,9 @@ void* AwesomeHeap::allocate(size_t nSize)
 
   ++m_Stat.nTotalOccupiedBlocks;
 
+  // В этой точке мы нашли и заняли чанк, в который влезает nAlignedSize байт
+  // пользовательских данных. На оставшеся памяти чанка (хвост) можно попробовать
+  // создать новый свободный чанк, чтобы она не пропадала даром.
   Chunk* pTailChunk = reinterpret_cast<Chunk*>(pOccupiedChunk->pUserData + nAlignedSize);
   assert(pTailChunk <= pOccupiedChunk->pNext);
 
@@ -52,6 +61,8 @@ void* AwesomeHeap::allocate(size_t nSize)
     pTailChunk->pNext->pPrevious = pTailChunk;
     pOccupiedChunk->pNext = pTailChunk;
   } else {
+    // "Хвост" чанка слишком маленький, поэтому создавать на нём новый чанк
+    // не имеет смысла, будет большой overhead.
     assert(m_Stat.nTotalFreeBlocks > 0);
     --m_Stat.nTotalFreeBlocks;
   }
@@ -60,6 +71,8 @@ void* AwesomeHeap::allocate(size_t nSize)
 
 void AwesomeHeap::free(void *pData)
 {
+  // Получаем указатель на чанк, которому принадлежат
+  // данные pData и освобождаем его
   Chunk* pReleasedChunk = asChunk(pData);
 
   pReleasedChunk->lFree = true;
@@ -68,11 +81,15 @@ void AwesomeHeap::free(void *pData)
   assert(m_Stat.nTotalOccupiedBlocks > 0);
   --m_Stat.nTotalOccupiedBlocks;
 
+  // Если чанк, следующий за освобождённым, так же свободен,
+  // то присоединием следующий чанк к текущему
   Chunk* pNextChunk = pReleasedChunk->pNext;
   assert(pNextChunk != nullptr);
   if (pNextChunk->lFree && pNextChunk != m_pLastChunk)
     leftJoin(pReleasedChunk, pNextChunk);
 
+  // Если предыдущий чанк свободен, то можем присоединить
+  // текущий чанк к предыдущему
   Chunk* pPreviousChunk = pReleasedChunk->pPrevious;
   if (pPreviousChunk && pPreviousChunk->lFree)
     leftJoin(pPreviousChunk, pReleasedChunk);
@@ -123,6 +140,9 @@ AwesomeHeap::Chunk* AwesomeHeap::findWorstChunk(size_t nSize)
 
 void AwesomeHeap::checkChunk(AwesomeHeap::Chunk *pChunk)
 {
+  // Это вспомогательная функция, которая не используется сейчас,
+  // но может быть использована при отладке кода, чтобы отлавливать
+  // невалидные чанки
   if (!pChunk)
     return;
   assert(checkPointer(pChunk));
@@ -142,6 +162,9 @@ void AwesomeHeap::checkChunk(AwesomeHeap::Chunk *pChunk)
 
 void AwesomeHeap::checkHeap()
 {
+  // Это вспомогательная функция, которая нигде не используется в
+  // данный момент, но может быть использована чтобы проверить, что
+  // куча не нарушена и находится в консистентном состоянии
   Chunk* pCurrentChunk = m_pFirstChunk;
   while(pCurrentChunk != m_pLastChunk) {
     checkChunk(pCurrentChunk);
