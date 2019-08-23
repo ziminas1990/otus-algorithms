@@ -62,24 +62,86 @@ bool TestKnuthMorrisPrataSearch()
   return KnuthMorrisPrataSearch(sPattern, sText, alphabet) == NaiveSearch(sPattern, sText);
 }
 
+bool PerfomanceTest(size_t nTextLength)
+{
+  Alphabet alphabet;
+  for (char sym : "ABCDEFGHIJKLMNOP")
+    alphabet.push_back(sym);
+  alphabet.pop_back();
+
+  std::string sText    = generateText(alphabet, nTextLength);
+  std::string sPattern = getRandomSubstring(sText, 15, 15);
+
+  Stopwatch stopwatch;
+
+  stopwatch.start();
+  for (size_t i = 0; i < 100; ++i)
+    NaiveSearch(sPattern, sText);
+  std::cout << stopwatch.sinceStartMs() << " ";
+
+  stopwatch.start();
+  for (size_t i = 0; i < 100; ++i)
+    BoyerMooreHorspoolSearch(sPattern, sText);
+  std::cout << stopwatch.sinceStartMs() << " ";
+
+  stopwatch.start();
+  SwitchesTable switchTable = buildSwitchesTable(sPattern.c_str(), sPattern.size(), alphabet);
+  for (size_t i = 0; i < 100; ++i)
+    KnuthMorrisPrataSearch(sPattern, sText, switchTable, alphabet);
+  std::cout << stopwatch.sinceStartMs() << std::endl;
+
+  return true;
+}
+
 int main(int argc, char* argv[])
 {
-  auto nSeed = time(nullptr);
-  {
-    Stopwatch stopwatch;
-    stopwatch.start();
-    auto sStatus = RunRandomizedTest(TestBoyerMooreHorpoolSearch, nSeed, 500);
-    auto nDuration = stopwatch.sinceStartMs();
-    std::cout << "Testing Boyer-Moore-Horpool: " << sStatus <<
-                 " (" << nDuration << " ms)" << std::endl;
+  if (argc < 2)
+    return 0;
+
+  std::string sMode = std::string(argv[1]);
+
+  if (sMode == "autotests") {
+    auto nSeed = time(nullptr);
+    {
+      Stopwatch stopwatch;
+      stopwatch.start();
+      auto sStatus = RunRandomizedTest(TestBoyerMooreHorpoolSearch, nSeed, 500);
+      auto nDuration = stopwatch.sinceStartMs();
+      std::cout << "Testing Boyer-Moore-Horspool: " << sStatus <<
+                   " (" << nDuration << " ms)" << std::endl;
+    }
+    {
+      Stopwatch stopwatch;
+      stopwatch.start();
+      auto sStatus = RunRandomizedTest(TestKnuthMorrisPrataSearch, nSeed, 500);
+      auto nDuration = stopwatch.sinceStartMs();
+      std::cout << "Testing Knuth-Morris-Prata: " << sStatus <<
+                   " (" << nDuration << " ms)" << std::endl;
+    }
+    return 0;
   }
-  {
-    Stopwatch stopwatch;
-    stopwatch.start();
-    auto sStatus = RunRandomizedTest(TestKnuthMorrisPrataSearch, nSeed, 500);
-    auto nDuration = stopwatch.sinceStartMs();
-    std::cout << "Testing Knuth-Morris-Prata: " << sStatus <<
-                 " (" << nDuration << " ms)" << std::endl;
+
+  if (sMode == "perfomance") {
+    if (argc != 5)
+      return 1;
+    int nSmallText = atoi(argv[2]);
+    int nBigText   = atoi(argv[3]);
+    int nStep      = atoi(argv[4]);
+    for (int nLength = nSmallText; nLength <= nBigText; nLength += nStep) {
+      std::cout << nLength << " ";
+      PerfomanceTest(nLength);
+    }
+
+    return 0;
+  }
+
+  if (sMode == "trace") {
+    if (argc != 4)
+      return 1;
+    std::string sPattern = argv[2];
+    std::string sText    = argv[3];
+    BoyerMooreHorspoolSearch(sPattern, sText, true);
+    return 0;
   }
   return 0;
 }
