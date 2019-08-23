@@ -140,7 +140,12 @@ int main(int argc, char* argv[])
       return 1;
     std::string sPattern = argv[2];
     std::string sText    = argv[3];
-    BoyerMooreHorspoolSearch(sPattern, sText, true);
+    auto matches = BoyerMooreHorspoolSearch(sPattern, sText, true);
+
+    std::cout << matches.size() << " matches: ";
+    for (size_t index : matches)
+      std::cout << index << " ";
+    std::cout << std::endl;
     return 0;
   }
   return 0;

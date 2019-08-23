@@ -31,12 +31,9 @@ static  void printState(std::string const& sPattern, std::string const& sText,
 {
   std::cout << "Offset: " << nOffset << std::endl;
   std::cout << sText << std::endl;
-  for (size_t i = 0; i < sText.size(); ++i)
-    if (i < nOffset || i > nOffset + sPattern.size())
-      std::cout << ' ';
-    else
-      std::cout << sPattern[i - nOffset];
-  std::cout << std::endl << std::endl;
+  for (size_t i = 0; i < nOffset + sPattern.size(); ++i)
+    std::cout << ((i < nOffset) ? ' ' : sPattern[i - nOffset]);
+  std::cout << std::endl;
 }
 
 inline size_t applyPattern(std::string const& sPattern, std::string const& sText,
