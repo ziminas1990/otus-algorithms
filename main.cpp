@@ -7,6 +7,8 @@
 #include "KnuthMorrisPrata.h"
 #include "Utils.h"
 
+// Наивная реализация поиска подстроки в строке. Результат её работы будет использоваться
+// как эталон для проверки других алгоритмах в автотестах
 std::vector<size_t> NaiveSearch(std::string const& sPattern, std::string const& sText)
 {
   std::vector<size_t> matches;
@@ -22,6 +24,7 @@ std::vector<size_t> NaiveSearch(std::string const& sPattern, std::string const& 
   return matches;
 }
 
+// Генерирует произвольный текст длиной nTextLength и алфавитом alphabet
 std::string generateText(Alphabet const& alphabet, size_t nTextLength)
 {
   std::string sText(nTextLength, alphabet[0]);
@@ -30,6 +33,7 @@ std::string generateText(Alphabet const& alphabet, size_t nTextLength)
   return sText;
 }
 
+// Выбирает из текста произвольную подстроку длиной от nMinLength до nMaxLength
 std::string getRandomSubstring(std::string const& sText, size_t nMinLength,
                                 size_t nMaxLength)
 {
@@ -38,6 +42,7 @@ std::string getRandomSubstring(std::string const& sText, size_t nMinLength,
   return sText.substr(nOffset, nLength);
 }
 
+// Функция тестирует работу алгоритма БМХ
 bool TestBoyerMooreHorpoolSearch()
 {
   Alphabet alphabet;
@@ -50,6 +55,7 @@ bool TestBoyerMooreHorpoolSearch()
   return BoyerMooreHorspoolSearch(sPattern, sText) == NaiveSearch(sPattern, sText);
 }
 
+// Функция тестирует работу алгоритма КМП
 bool TestKnuthMorrisPrataSearch()
 {
   Alphabet alphabet;
@@ -62,6 +68,8 @@ bool TestKnuthMorrisPrataSearch()
   return KnuthMorrisPrataSearch(sPattern, sText, alphabet) == NaiveSearch(sPattern, sText);
 }
 
+// Функция производит стократный прогон каждого из алгоритмов на одном и том же наборе
+// данных и для каждого алгоритм измеряет время прогона. Время выводится сразу в консоль.
 bool PerfomanceTest(size_t nTextLength)
 {
   Alphabet alphabet;
@@ -101,6 +109,9 @@ int main(int argc, char* argv[])
   std::string sMode = std::string(argv[1]);
 
   if (sMode == "autotests") {
+    // Режим автотестов
+    // Для каждого из алгоритмов запускает автотесты 500 раз (каждый раз
+    // будут генерится новые входные данные) и возвращает результат проверки
     auto nSeed = time(nullptr);
     {
       Stopwatch stopwatch;
@@ -122,6 +133,7 @@ int main(int argc, char* argv[])
   }
 
   if (sMode == "perfomance") {
+    // Режим сравнения производительности
     if (argc != 5)
       return 1;
     int nSmallText = atoi(argv[2]);
@@ -136,6 +148,7 @@ int main(int argc, char* argv[])
   }
 
   if (sMode == "trace") {
+    // Режим трассировки алгоритма БМХ
     if (argc != 4)
       return 1;
     std::string sPattern = argv[2];
