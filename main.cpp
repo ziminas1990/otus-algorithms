@@ -108,8 +108,11 @@ class LRUCache : public AbstractRAM
         return;
       pLine->pPrevios  = nullptr;
       pLine->pNext     = pFirst;
-      pFirst->pPrevios = pLine;
-      pFirst           = pLine;
+      if (pFirst)
+        pFirst->pPrevios = pLine;
+      pFirst = pLine;
+      if (!pLast)
+        pLast = pFirst;
     }
 
     void exclude(CacheLine* pLine) {
@@ -133,7 +136,7 @@ class LRUCache : public AbstractRAM
 public:
   LRUCache(AbstractRAM* pDownLevel, size_t nSystemBusWidth, size_t nMaxLines,
            size_t nTicksToRead, size_t nTicksToWrite)
-    : pDownLevel(pDownLevel), nSystemBusWidth(nSystemBusWidth), nMaxLines(nMaxLines),
+    : pDownLevel(pDownLevel), nSystemBusWidth(nSystemBusWidth),
       nTicksToRead(nTicksToRead), nTicksToWrite(nTicksToWrite)
   {
     for(size_t i = 1; i < nMaxLines; ++i)
@@ -146,17 +149,8 @@ public:
     size_t nPageOffset = addr % nSystemBusWidth;
     size_t nPageAddr   = addr - nPageOffset;
 
-    bool lCacheHit   = false;
-    CacheLine* pLine = getOrLoadCacheLine(nPageAddr, lCacheHit);
-
-    if (!lCacheHit) {
-      pDownLevel->load(nPageAddr, pLine->pPage, nSystemBusWidth);
-      nLastOperationTime += pDownLevel->lastOperationTime();
-    } else {
-      nLastOperationTime += nTicksToRead;
-    }
-
-    moveToFirst(pLine);
+    CacheLine* pLine   = getOrLoadCacheLine(nPageAddr);
+    nLastOperationTime += nTicksToRead;
     return pLine->pPage[nPageOffset];
   }
 
@@ -171,10 +165,10 @@ public:
       pDownLevel->set(addr, value);
       nLastOperationTime += pDownLevel->lastOperationTime();
     } else {
-      CacheLine* pLine   = I->second;
-      pLine[nPageOffset] = value;
-      pLine->lModified   = true;
-      nLastOperationTime = nTicksToWrite;
+      CacheLine* pLine          = I->second;
+      pLine->pPage[nPageOffset] = value;
+      pLine->lModified          = true;
+      nLastOperationTime        = nTicksToWrite;
     }
   }
 
@@ -194,12 +188,10 @@ public:
 
 private:
 
-  CacheLine* getOrLoadCacheLine(size_t nPageAddr, bool& lCacheHit)
+  CacheLine* getOrLoadCacheLine(size_t nPageAddr)
   {
-    auto I    = pageAddrToLine.find(nPageAddr);
-    lCacheHit = (I != pageAddrToLine.end());
-
-    if (!lCacheHit)
+    auto I = pageAddrToLine.find(nPageAddr);  // ~O(1)
+    if (I == pageAddrToLine.end())
       return loadToCache(nPageAddr);
 
     CacheLine* pLine = I->second;
@@ -212,12 +204,15 @@ private:
     CacheLine* pLine = cacheLines.popTail();
     if (pLine->lModified)
       flushCacheLine(pLine);
+    pageAddrToLine.erase(pLine->nPageAddr);
 
     pLine->nPageAddr = nPageAddr;
     pLine->lModified = false;
     pDownLevel->load(nPageAddr, pLine->pPage, nSystemBusWidth);
+    nLastOperationTime += pDownLevel->lastOperationTime();
 
     cacheLines.pushToHead(pLine);
+    pageAddrToLine[nPageAddr] = pLine;
     return pLine;
   }
 
@@ -230,7 +225,6 @@ private:
   AbstractRAM* pDownLevel;
 
   size_t nSystemBusWidth;
-  size_t nMaxLines;
   size_t nTicksToRead;
   size_t nTicksToWrite;
   size_t nLastOperationTime;
@@ -269,14 +263,22 @@ bool RandomReadWriteTest(AbstractRAM* pRAM, size_t nAvaliable)
 
 int main(int argc, char* argv[])
 {
-  size_t nCapacity = 100;
-  RAM justRAM(nCapacity, 10, 5);
-  LRUCache cache(&justRAM, 4, 8, 2, 4);
+  if (argc < 2)
+    return 0;
+  std::string sMode = argv[1];
 
-  auto fReadWriteTest = [&]() { return RandomReadWriteTest(&cache, nCapacity); };
+  if (sMode == "autotest") {
+    size_t nCapacity = 16 * 1024;
+    RAM justRAM(nCapacity, 5, 10);
+    LRUCache cache(&justRAM, 4, 2, 2, 4);
 
-  std::cout << "Testing RAM: " <<
-               RunRandomizedTest(fReadWriteTest, 59774, 100) << std::endl;
+    auto fReadWriteTest = [&]() { return RandomReadWriteTest(&cache, nCapacity); };
+    std::cout << "LRUCache random R/W test: " <<
+                 RunRandomizedTest(fReadWriteTest, time(nullptr), 100) << std::endl;
+    return 0;
+  }
+
+  if (sMode == "")
 
   return 0;
 }
