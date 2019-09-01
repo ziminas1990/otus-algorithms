@@ -234,7 +234,7 @@ private:
 };
 
 
-bool RandomReadWriteTest(AbstractRAM* pRAM, size_t nAvaliable)
+bool SimpleTest(AbstractRAM* pRAM, size_t nAvaliable)
 {
   struct Cell {
     Cell() : addr(0), nValue(0) {}
@@ -260,11 +260,113 @@ bool RandomReadWriteTest(AbstractRAM* pRAM, size_t nAvaliable)
   return true;
 }
 
+inline
+size_t RandomRead(AbstractRAM* pRAM, size_t nTotalOperations,
+                  size_t nBeginAddr, size_t nEndAddr)
+{
+  size_t nTotalTicks = 0;
+  for(size_t i = 0; i < nTotalOperations; ++i) {
+    pRAM->get(randomNumber(nBeginAddr, nEndAddr));
+    nTotalTicks += pRAM->lastOperationTime();
+  }
+  return nTotalTicks;
+}
+
+inline
+size_t RandomWrite(AbstractRAM* pRAM, size_t nTotalOperations,
+                   size_t nBeginAddr, size_t nEndAddr)
+{
+  size_t nTotalTicks = 0;
+  for(size_t i = 0; i < nTotalOperations; ++i) {
+    pRAM->set(randomNumber(nBeginAddr, nEndAddr), std::rand() % 0xFF);
+    nTotalTicks += pRAM->lastOperationTime();
+  }
+  return nTotalTicks;
+}
+
+inline size_t Scanning(AbstractRAM* pRAM, size_t nBeginAddr, size_t nEndAddr, bool lRead)
+{
+  bool lForward = nEndAddr > nBeginAddr;
+  size_t nTotalTicks = 0;
+  for(size_t nAddr = nBeginAddr; nAddr != nEndAddr; nAddr += (lForward) ? 1 : -1) {
+    if (lRead) {
+      pRAM->get(nAddr);
+    } else {
+      pRAM->set(nAddr, std::rand() % 0xFF);
+    }
+    nTotalTicks += pRAM->lastOperationTime();
+  }
+  return nTotalTicks;
+}
+
+size_t RandomReadWrite(AbstractRAM* pRAM, size_t nTotalOperations,
+                       size_t nBeginAddr, size_t nEndAddr, uint8_t nReadWriteFactor)
+{
+  size_t nTotalTicks = 0;
+  while (nTotalOperations) {
+    size_t nOperations = std::rand() % 20;
+
+    if (nOperations > nTotalOperations)
+      nOperations = nTotalOperations;
+    nTotalOperations -= nOperations;
+
+    bool lRead = std::rand() % (1 + nReadWriteFactor);
+    if (lRead) {
+      nTotalTicks += RandomRead(pRAM, nOperations, nBeginAddr, nEndAddr);
+    } else {
+      nTotalTicks += RandomWrite(pRAM, nOperations, nBeginAddr, nEndAddr);
+    }
+  }
+  return nTotalTicks;
+}
+
+size_t PartialyRandomReadWrite(AbstractRAM* pRAM, size_t nTotalOperations,
+                               size_t nCapacity, uint8_t nRWFactor)
+{
+  size_t nTotalTicks = 0;
+  while (nTotalOperations) {
+    size_t nOperations = std::rand() % 1000;
+
+    if (nOperations > nTotalOperations)
+      nOperations = nTotalOperations;
+    nTotalOperations -= nOperations;
+
+    size_t nAreaSize     = 2048;
+    size_t nBeginAddress = randomNumber(0, nCapacity - nAreaSize);
+    size_t nEndAddress   = nBeginAddress + nAreaSize;
+
+    nTotalTicks += RandomReadWrite(pRAM, nOperations, nBeginAddress, nEndAddress, nRWFactor);
+  }
+  return nTotalTicks;
+}
+
+size_t RandomScanningTest(AbstractRAM* pRAM, size_t nTotalOperations,
+                          size_t nCapacity, uint8_t nRWFactor)
+{
+  size_t nTotalTicks = 0;
+  while (nTotalOperations) {
+    size_t nOperations = std::rand() % 1000;
+
+    if (nOperations > nTotalOperations)
+      nOperations = nTotalOperations;
+    nTotalOperations -= nOperations;
+
+    size_t nAreaSize     = 2048;
+    size_t nBeginAddress = randomNumber(nAreaSize, nCapacity - nAreaSize);
+    size_t nEndAddress   = randomNumber(nBeginAddress - nAreaSize,
+                                        nBeginAddress + nAreaSize);
+    bool lRead           = std::rand() % (1 + nRWFactor);
+    nTotalTicks += Scanning(pRAM, nBeginAddress, nEndAddress, lRead);
+  }
+  return nTotalTicks;
+}
 
 int main(int argc, char* argv[])
 {
   if (argc < 2)
     return 0;
+  std::srand(time(nullptr));
+
   std::string sMode = argv[1];
 
   if (sMode == "autotest") {
@@ -272,13 +374,63 @@ int main(int argc, char* argv[])
     RAM justRAM(nCapacity, 5, 10);
     LRUCache cache(&justRAM, 4, 2, 2, 4);
 
-    auto fReadWriteTest = [&]() { return RandomReadWriteTest(&cache, nCapacity); };
+    auto fReadWriteTest = [&]() { return SimpleTest(&cache, nCapacity); };
     std::cout << "LRUCache random R/W test: " <<
                  RunRandomizedTest(fReadWriteTest, time(nullptr), 100) << std::endl;
     return 0;
   }
 
-  if (sMode == "")
+  if (sMode == "perfomance") {
+    std::vector<size_t> cacheLinesSize  = { 2, 4,  8,  16, 32,  64 };
+    std::vector<size_t> cacheTotalLines = { 8, 16, 32, 64, 128, 256 };
 
+    uint16_t nSeed   = std::rand() % 0xFFFF;
+    size_t nCapacity = 128 * 1024;
+
+    std::cout << "Random R/W test:" << std::endl;
+    for (size_t cacheLines : cacheTotalLines){
+      std::srand(nSeed);
+      std::cout << cacheLines << std::flush;
+
+      for (size_t cacheLineSize : cacheLinesSize) {
+        RAM justRAM(nCapacity, 20, 20);
+        LRUCache cache(&justRAM, cacheLineSize, cacheLines, 1, 1);
+        size_t nTicks = RandomReadWrite(&cache, 100000, 0, nCapacity - 1, 4);
+        std::cout << " " << (nTicks / 1000) << std::flush;
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "Partially random R/W test:" << std::endl;
+    for (size_t cacheLines : cacheTotalLines){
+      std::srand(nSeed);
+      std::cout << cacheLines << std::flush;
+
+      for (size_t cacheLineSize : cacheLinesSize) {
+        RAM justRAM(nCapacity, 20, 20);
+        LRUCache cache(&justRAM, cacheLineSize, cacheLines, 1, 1);
+        size_t nTicks = PartialyRandomReadWrite(&cache, 100000, nCapacity, 4);
+        std::cout << " " << (nTicks / 1000) << std::flush;
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "Random scanning R/W test:" << std::endl;
+    for (size_t cacheLines : cacheTotalLines){
+      std::srand(nSeed);
+      std::cout << cacheLines << std::flush;
+
+      for (size_t cacheLineSize : cacheLinesSize) {
+        RAM justRAM(nCapacity, 20, 20);
+        LRUCache cache(&justRAM, cacheLineSize, cacheLines, 1, 1);
+        size_t nTicks = RandomScanningTest(&cache, 100000, nCapacity, 4);
+        std::cout << " " << (nTicks / 1000) << std::flush;
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
   return 0;
 }

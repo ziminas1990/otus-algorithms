@@ -79,6 +79,10 @@ inline std::string RunRandomizedTest(
   return "OK (" + std::to_string(stopwatch.sinceStartMs()) + " ms)";
 }
 
+inline size_t randomNumber(size_t nBegin, size_t nEnd)
+{
+  return nBegin + std::rand() % (1 + nEnd - nBegin);
+}
 
 inline uint32_t createdRandomColor()
 {
