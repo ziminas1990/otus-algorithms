@@ -345,18 +345,17 @@ size_t RandomScanningTest(AbstractRAM* pRAM, size_t nTotalOperations,
 {
   size_t nTotalTicks = 0;
   while (nTotalOperations) {
-    size_t nOperations = std::rand() % 1000;
-
-    if (nOperations > nTotalOperations)
-      nOperations = nTotalOperations;
-    nTotalOperations -= nOperations;
-
     size_t nAreaSize     = 2048;
     size_t nBeginAddress = randomNumber(nAreaSize, nCapacity - nAreaSize);
     size_t nEndAddress   = randomNumber(nBeginAddress - nAreaSize,
                                         nBeginAddress + nAreaSize);
     bool lRead           = std::rand() % (1 + nRWFactor);
     nTotalTicks += Scanning(pRAM, nBeginAddress, nEndAddress, lRead);
+
+    size_t nOperations = std::abs(long(nEndAddress - nBeginAddress));
+    if (nOperations > nTotalOperations)
+      nOperations = nTotalOperations;
+    nTotalOperations -= nOperations;
   }
   return nTotalTicks;
 }
